@@ -14,10 +14,12 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+	"mini_tiktok/cmd/api/biz/rpc"
 	"mini_tiktok/pkg/consts"
 )
 
 func Init() {
+	rpc.Init()
 	hlog.SetLogger(hertzlogrus.NewLogger())
 	hlog.SetLevel(hlog.LevelInfo)
 }

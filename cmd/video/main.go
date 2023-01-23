@@ -14,11 +14,14 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	videoService "mini_tiktok/cmd/video/kitex_gen/videoService/videoservice"
+	"mini_tiktok/cmd/video/rpc"
 	"mini_tiktok/pkg/consts"
 	"net"
 )
 
 func Init() {
+	rpc.Init()
+	//dal.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }

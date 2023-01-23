@@ -14,11 +14,14 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	userService "mini_tiktok/cmd/user/kitex_gen/userService/userservice"
+	"mini_tiktok/cmd/user/rpc"
 	"mini_tiktok/pkg/consts"
 	"net"
 )
 
 func Init() {
+	rpc.Init()
+	//dal.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }
