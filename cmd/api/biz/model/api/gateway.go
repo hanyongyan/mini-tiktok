@@ -11,7 +11,7 @@ import (
 type User struct {
 	ID            int64  `thrift:"id,1" form:"id" json:"id" query:"id"`
 	Name          string `thrift:"name,2" form:"name" json:"name" query:"name"`
-	FollowCount   string `thrift:"follow_count,3" form:"follow_count" json:"follow_count" query:"follow_count"`
+	FollowCount   int64  `thrift:"follow_count,3" form:"follow_count" json:"follow_count" query:"follow_count"`
 	FollowerCount int64  `thrift:"follower_count,4" form:"follower_count" json:"follower_count" query:"follower_count"`
 	IsFollow      bool   `thrift:"is_follow,5" form:"is_follow" json:"is_follow" query:"is_follow"`
 }
@@ -28,7 +28,7 @@ func (p *User) GetName() (v string) {
 	return p.Name
 }
 
-func (p *User) GetFollowCount() (v string) {
+func (p *User) GetFollowCount() (v int64) {
 	return p.FollowCount
 }
 
@@ -88,7 +88,7 @@ func (p *User) Read(iprot thrift.TProtocol) (err error) {
 				}
 			}
 		case 3:
-			if fieldTypeId == thrift.STRING {
+			if fieldTypeId == thrift.I64 {
 				if err = p.ReadField3(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -166,7 +166,7 @@ func (p *User) ReadField2(iprot thrift.TProtocol) error {
 }
 
 func (p *User) ReadField3(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadString(); err != nil {
+	if v, err := iprot.ReadI64(); err != nil {
 		return err
 	} else {
 		p.FollowCount = v
@@ -272,10 +272,10 @@ WriteFieldEndError:
 }
 
 func (p *User) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("follow_count", thrift.STRING, 3); err != nil {
+	if err = oprot.WriteFieldBegin("follow_count", thrift.I64, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.FollowCount); err != nil {
+	if err := oprot.WriteI64(p.FollowCount); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
