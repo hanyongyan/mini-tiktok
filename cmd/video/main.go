@@ -16,6 +16,7 @@ import (
 	videoService "mini_tiktok/cmd/video/kitex_gen/videoService/videoservice"
 	"mini_tiktok/cmd/video/rpc"
 	"mini_tiktok/pkg/consts"
+	"mini_tiktok/pkg/mw"
 	"net"
 )
 
@@ -65,6 +66,8 @@ func main() {
 	svr := videoService.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
+		server.WithMiddleware(mw.CommonMiddleware),
+		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.VideoServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),
 		server.WithRegistry(registry.NewNacosRegistry(cli)),

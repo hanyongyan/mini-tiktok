@@ -16,6 +16,7 @@ import (
 	userService "mini_tiktok/cmd/user/kitex_gen/userService/userservice"
 	"mini_tiktok/cmd/user/rpc"
 	"mini_tiktok/pkg/consts"
+	"mini_tiktok/pkg/mw"
 	"net"
 )
 
@@ -67,6 +68,8 @@ func main() {
 	svr := userService.NewServer(new(UserServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
+		server.WithMiddleware(mw.CommonMiddleware),
+		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.UserServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),
 		server.WithRegistry(registry.NewNacosRegistry(cli)),
