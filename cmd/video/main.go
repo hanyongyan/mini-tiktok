@@ -15,14 +15,17 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	videoService "mini_tiktok/cmd/video/kitex_gen/videoService/videoservice"
 	"mini_tiktok/cmd/video/rpc"
+	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
+	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
 	"net"
 )
 
 func Init() {
+	config.Init()
 	rpc.Init()
-	//dal.Init()
+	dal.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }

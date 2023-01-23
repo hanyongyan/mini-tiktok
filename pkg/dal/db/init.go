@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gen/examples/dal/query"
 	"gorm.io/gorm"
@@ -20,8 +22,14 @@ func Init() {
 			LogLevel:      logger.Info,
 		},
 	)
-	// TODO use viper
-	db, err := gorm.Open(mysql.Open(""),
+	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local",
+		viper.GetString("db.username"),
+		viper.GetString("db.password"),
+		viper.GetString("db.host"),
+		viper.GetInt("db.port"),
+		viper.GetString("db.database"),
+	)
+	db, err := gorm.Open(mysql.Open(dsn),
 		&gorm.Config{
 			PrepareStmt: true,
 			Logger:      gormlogrus,
