@@ -5,8 +5,12 @@ package api
 import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	api "mini_tiktok/cmd/api/biz/model/api"
+	"mini_tiktok/cmd/api/biz/rpc"
+	"mini_tiktok/cmd/user/kitex_gen/userService"
+	"mini_tiktok/pkg/errno"
 )
 
 // Feed .
@@ -36,7 +40,21 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp := new(api.UserRegisterResp)
+	userClient := rpc.GetUserClient()
+	registerResponse, err := userClient.Register(context.Background(), &userService.DouyinUserRegisterRequest{
+		Username: req.Username,
+		Password: req.Password,
+	})
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{"code": errno.AuthorizationFailedErr, "message": err.Error()})
+		return
+	}
+	resp := &api.UserRegisterResp{
+		StatusCode:    int64(registerResponse.StatusCode),
+		StatusMessage: registerResponse.StatusMsg,
+		UserID:        registerResponse.UserId,
+		Token:         registerResponse.Token,
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
@@ -51,8 +69,21 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
-	resp := new(api.UserLoginResp)
+	client := rpc.GetUserClient()
+	loginResponse, err := client.Login(context.Background(), &userService.DouyinUserLoginRequest{
+		Username: req.Username,
+		Password: req.Password,
+	})
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{"code": errno.AuthorizationFailedErr, "message": err.Error()})
+		return
+	}
+	resp := &api.UserLoginResp{
+		StatusCode:    int64(loginResponse.StatusCode),
+		StatusMessage: loginResponse.StatusMsg,
+		UserID:        loginResponse.UserId,
+		Token:         loginResponse.Token,
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }

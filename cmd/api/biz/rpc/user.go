@@ -16,6 +16,10 @@ import (
 
 var userService userservice.Client
 
+func GetUserClient() userservice.Client {
+	return userService
+}
+
 func initUser() {
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig(consts.NacosAddr, consts.NacosPort),

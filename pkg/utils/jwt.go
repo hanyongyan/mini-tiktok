@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"mini_tiktok/pkg/consts"
 	"time"
@@ -29,9 +28,8 @@ func CreateToken(userId int64) (string, error) {
 
 func CheckToken(token string) (*Claims, bool) {
 	tokenObj, _ := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return consts.SecretKey, nil
+		return []byte(consts.SecretKey), nil
 	})
-	fmt.Println(tokenObj)
 	if key, _ := tokenObj.Claims.(*Claims); tokenObj.Valid {
 		return key, true
 	} else {

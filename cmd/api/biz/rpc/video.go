@@ -16,6 +16,10 @@ import (
 
 var videoService videoservice.Client
 
+func GetVideoClient() videoservice.Client {
+	return videoService
+}
+
 func initVideo() {
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig(consts.NacosAddr, consts.NacosPort),
