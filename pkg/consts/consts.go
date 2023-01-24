@@ -11,5 +11,6 @@ const (
 	UserServiceAddr  = ":9000"
 	VideoServiceAddr = ":10000"
 	ExportEndpoint   = ":4317"
-	MysqlDefaultDSN  = ""
+	SecretKey        = "21xby87!*&B**!N@*N!N1N@#^!T@!N@!T@ET1be12N@)"
+	IdentityKey      = "id"
 )

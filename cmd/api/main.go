@@ -14,6 +14,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+	"mini_tiktok/cmd/api/biz/mw"
 	"mini_tiktok/cmd/api/biz/rpc"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
@@ -22,6 +23,7 @@ import (
 func Init() {
 	config.Init()
 	rpc.Init()
+	mw.InitJWT()
 	hlog.SetLogger(hertzlogrus.NewLogger())
 	hlog.SetLevel(hlog.LevelInfo)
 }
