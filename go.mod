@@ -7,8 +7,8 @@ require (
 	github.com/cloudwego/fastpb v0.0.3
 	github.com/cloudwego/hertz v0.5.1
 	github.com/cloudwego/kitex v0.4.4
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/hertz-contrib/gzip v0.0.1
-	github.com/hertz-contrib/jwt v1.0.1
 	github.com/hertz-contrib/obs-opentelemetry/logging/logrus v0.1.1
 	github.com/hertz-contrib/obs-opentelemetry/tracing v0.1.1
 	github.com/hertz-contrib/pprof v0.1.0
@@ -20,6 +20,7 @@ require (
 	github.com/kitex-contrib/registry-nacos v0.0.1
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/spf13/viper v1.15.0
+	go.opentelemetry.io/otel/trace v1.9.0
 	google.golang.org/protobuf v1.28.1
 	gorm.io/driver/mysql v1.4.3
 	gorm.io/gen v0.3.19
@@ -46,7 +47,6 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
-	github.com/golang-jwt/jwt/v4 v4.4.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/pprof v0.0.0-20220608213341-c488b8fa1db3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -91,7 +91,6 @@ require (
 	go.opentelemetry.io/otel/metric v0.31.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.9.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v0.31.0 // indirect
-	go.opentelemetry.io/otel/trace v1.9.0 // indirect
 	go.opentelemetry.io/proto/otlp v0.18.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
