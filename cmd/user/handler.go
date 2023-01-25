@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"mini_tiktok/cmd/user/utils"
 	"mini_tiktok/kitex_gen/userService"
 	"mini_tiktok/pkg/dal/model"
@@ -15,18 +16,29 @@ type UserServiceImpl struct{}
 
 // Login implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Login(ctx context.Context, req *userService.DouyinUserLoginRequest) (resp *userService.DouyinUserLoginResponse, err error) {
-	q := query.Q
-	checkRes, err := utils.CheckUser(q, req.Username, req.Password)
-	token, err := jwtutil.CreateToken(checkRes.ID)
-	if err != nil {
-		return
-	}
+	klog.Infof("received username: %gv, pasword: %v", req.Username, req.Password)
+	//q := query.Q
+	//checkRes, err := utils.CheckUser(q, req.Username, req.Password)
+	//if err != nil {
+	//	return
+	//}
+	//token, err := jwtutil.CreateToken(checkRes.ID)
+	//if err != nil {
+	//	return
+	//}
+	//resp = &userService.DouyinUserLoginResponse{
+	//	StatusCode: 0,
+	//	StatusMsg:  "登陆成功",
+	//	UserId:     checkRes.ID,
+	//	Token:      token,
+	//}
 	resp = &userService.DouyinUserLoginResponse{
 		StatusCode: 0,
-		StatusMsg:  "登陆成功",
-		UserId:     checkRes.ID,
-		Token:      token,
+		StatusMsg:  "",
+		UserId:     0,
+		Token:      "",
 	}
+	err = nil
 	return
 }
 

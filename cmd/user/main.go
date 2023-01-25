@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	kitexlogrus "github.com/kitex-contrib/obs-opentelemetry/logging/logrus"
@@ -18,7 +18,6 @@ import (
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
-	"mini_tiktok/pkg/mw"
 	"net"
 )
 
@@ -63,16 +62,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	addr, err := net.ResolveTCPAddr(consts.TCP, consts.UserServiceAddr)
+	addr, err := net.ResolveTCPAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.UserServiceAddr))
 	if err != nil {
 		panic(err)
 	}
 	Init()
 	svr := userservice.NewServer(new(UserServiceImpl),
 		server.WithServiceAddr(addr),
-		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
-		server.WithMiddleware(mw.CommonMiddleware),
-		server.WithMiddleware(mw.ServerMiddleware),
+		//server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
+		//server.WithMiddleware(mw.CommonMiddleware),
+		//server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.UserServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),
 		server.WithRegistry(registry.NewNacosRegistry(cli)),

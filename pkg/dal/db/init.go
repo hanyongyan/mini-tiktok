@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm/logger"
 	"gorm.io/plugin/opentelemetry/logging/logrus"
 	"gorm.io/plugin/opentelemetry/tracing"
+	"log"
 	"time"
 )
 
@@ -41,6 +42,9 @@ func Init() {
 
 	if err := db.Use(tracing.NewPlugin()); err != nil {
 		panic(err)
+	}
+	if db == nil {
+		log.Println("db is nil")
 	}
 	query.SetDefault(db)
 }

@@ -11,7 +11,6 @@ import (
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
 	"mini_tiktok/kitex_gen/userService"
-	"mini_tiktok/pkg/errno"
 	"strconv"
 )
 
@@ -47,7 +46,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		Password: req.Password,
 	})
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{"code": errno.AuthorizationFailedErr, "message": err.Error()})
+		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
 		return
 	}
 	resp := &api.UserRegisterResp{
@@ -70,27 +69,28 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-	userClient := rpc.UserRpcClient
-	if userClient == nil {
-		hlog.Info("user Client is nil")
-		return
-	}
-	loginResponse, err := userClient.Login(context.Background(), &userService.DouyinUserLoginRequest{
+	hlog.Info("start call login rpc api")
+	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userService.DouyinUserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
+	hlog.Info("call login rpc api end")
 	if err != nil {
+		hlog.Error("error occur", err)
 		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
 		return
 	}
-	resp := &api.UserLoginResp{
-		StatusCode:    int64(loginResponse.StatusCode),
-		StatusMessage: loginResponse.StatusMsg,
-		UserID:        loginResponse.UserId,
-		Token:         loginResponse.Token,
-	}
+	//resp := &api.UserLoginResp{
+	//	StatusCode:    int64(loginResponse.StatusCode),
+	//	StatusMessage: loginResponse.StatusMsg,
+	//	UserID:        loginResponse.UserId,
+	//	Token:         loginResponse.Token,
+	//}
+	hlog.Infof("get resp: %+v", loginResponse)
 
-	c.JSON(consts.StatusOK, resp)
+	c.JSON(consts.StatusOK, utils.H{
+		"msg": "done",
+	})
 }
 
 // User .
@@ -109,7 +109,7 @@ func User(ctx context.Context, c *app.RequestContext) {
 	if err != nil {
 		c.JSON(consts.StatusOK, utils.H{
 			"code":    0,
-			"message": err,
+			"message": err.Error(),
 		})
 		return
 	}
