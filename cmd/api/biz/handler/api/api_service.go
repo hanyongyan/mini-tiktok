@@ -5,12 +5,14 @@ package api
 import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
-	"mini_tiktok/cmd/user/kitex_gen/userService"
+	"mini_tiktok/kitex_gen/userService"
 	"mini_tiktok/pkg/errno"
+	"strconv"
 )
 
 // Feed .
@@ -40,8 +42,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	userClient := rpc.GetUserClient()
-	registerResponse, err := userClient.Register(context.Background(), &userService.DouyinUserRegisterRequest{
+	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userService.DouyinUserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -69,13 +70,17 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-	client := rpc.GetUserClient()
-	loginResponse, err := client.Login(context.Background(), &userService.DouyinUserLoginRequest{
+	userClient := rpc.UserRpcClient
+	if userClient == nil {
+		hlog.Info("user Client is nil")
+		return
+	}
+	loginResponse, err := userClient.Login(context.Background(), &userService.DouyinUserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{"code": errno.AuthorizationFailedErr, "message": err.Error()})
+		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
 		return
 	}
 	resp := &api.UserLoginResp{
@@ -99,7 +104,26 @@ func User(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp := new(api.UserResp)
+	userId, _ := strconv.Atoi(req.UserID)
+	info, err := rpc.UserRpcClient.Info(context.Background(), &userService.DouyinUserRequest{UserId: int64(userId), Token: req.Token})
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"code":    0,
+			"message": err,
+		})
+		return
+	}
+	resp := &api.UserResp{
+		StatusCode:    int64(info.StatusCode),
+		StatusMessage: info.StatusMsg,
+		User: &api.User{
+			ID:            info.User.Id,
+			Name:          info.User.Name,
+			FollowCount:   info.User.FollowCount,
+			FollowerCount: info.User.FollowerCount,
+			IsFollow:      info.User.IsFollow,
+		},
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }

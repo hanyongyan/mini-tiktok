@@ -9,16 +9,12 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"mini_tiktok/cmd/user/kitex_gen/userService/userservice"
+	"mini_tiktok/kitex_gen/userService/userservice"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/mw"
 )
 
-var userService userservice.Client
-
-func GetUserClient() userservice.Client {
-	return userService
-}
+var UserRpcClient userservice.Client
 
 func initUser() {
 	sc := []constant.ServerConfig{
@@ -62,5 +58,5 @@ func initUser() {
 	if err != nil {
 		panic(err)
 	}
-	userService = c
+	UserRpcClient = c
 }

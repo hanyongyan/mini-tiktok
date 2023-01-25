@@ -9,16 +9,12 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"mini_tiktok/cmd/video/kitex_gen/videoService/videoservice"
+	"mini_tiktok/kitex_gen/videoService/videoservice"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/mw"
 )
 
-var videoService videoservice.Client
-
-func GetVideoClient() videoservice.Client {
-	return videoService
-}
+var VideoRpcClient videoservice.Client
 
 func initVideo() {
 	sc := []constant.ServerConfig{
@@ -61,5 +57,5 @@ func initVideo() {
 	if err != nil {
 		panic(err)
 	}
-	videoService = c
+	VideoRpcClient = c
 }

@@ -13,8 +13,8 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	videoService "mini_tiktok/cmd/video/kitex_gen/videoService/videoservice"
 	"mini_tiktok/cmd/video/rpc"
+	"mini_tiktok/kitex_gen/videoService/videoservice"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
@@ -66,7 +66,7 @@ func main() {
 		panic(err)
 	}
 	Init()
-	svr := videoService.NewServer(new(VideoServiceImpl),
+	svr := videoservice.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
 		server.WithMiddleware(mw.CommonMiddleware),
