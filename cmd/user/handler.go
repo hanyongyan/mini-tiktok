@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	userService "mini_tiktok/cmd/user/kitex_gen/userService"
 	"mini_tiktok/cmd/user/utils"
+	"mini_tiktok/kitex_gen/userService"
 	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
 	jwtutil "mini_tiktok/pkg/utils"

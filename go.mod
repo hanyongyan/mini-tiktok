@@ -11,7 +11,6 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/hertz-contrib/cache v0.0.0-20230125092053-a6711fd321d5
 	github.com/hertz-contrib/gzip v0.0.1
-	github.com/hertz-contrib/limiter v0.0.0-20221008063035-ad27db7cc386
 	github.com/hertz-contrib/obs-opentelemetry/logging/logrus v0.1.1
 	github.com/hertz-contrib/obs-opentelemetry/tracing v0.1.1
 	github.com/hertz-contrib/pprof v0.1.0
@@ -38,7 +37,6 @@ require (
 	github.com/bytedance/go-tagexpr/v2 v2.9.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20220623074550-9d6d3df70991 // indirect
 	github.com/bytedance/sonic v1.5.0 // indirect
-	github.com/c9s/goprocinfo v0.0.0-20210130143923-c95fcf8c64a8 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20211019084208-fb5309c8db06 // indirect

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	videoService "mini_tiktok/cmd/video/kitex_gen/videoService"
+	"mini_tiktok/kitex_gen/videoService"
 )
 
 // VideoServiceImpl implements the last service interface defined in the IDL.

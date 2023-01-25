@@ -10,7 +10,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
-	"mini_tiktok/cmd/user/kitex_gen/userService"
+	"mini_tiktok/kitex_gen/userService"
 	"mini_tiktok/pkg/errno"
 	"strconv"
 )

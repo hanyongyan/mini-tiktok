@@ -9,7 +9,7 @@ import (
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"
 	proto "google.golang.org/protobuf/proto"
-	videoService "mini_tiktok/cmd/video/kitex_gen/videoService"
+	videoService "mini_tiktok/kitex_gen/videoService"
 )
 
 func serviceInfo() *kitex.ServiceInfo {
