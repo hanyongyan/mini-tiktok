@@ -14,11 +14,7 @@ import (
 	"mini_tiktok/pkg/mw"
 )
 
-var userService userservice.Client
-
-func GetUserClient() userservice.Client {
-	return userService
-}
+var UserRpcClient userservice.Client
 
 func initUser() {
 	sc := []constant.ServerConfig{
@@ -62,5 +58,5 @@ func initUser() {
 	if err != nil {
 		panic(err)
 	}
-	userService = c
+	UserRpcClient = c
 }

@@ -4,40 +4,27 @@ package Api
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"github.com/cloudwego/hertz/pkg/common/utils"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/hertz-contrib/gzip"
 	"github.com/hertz-contrib/requestid"
 	"go.opentelemetry.io/otel/trace"
-	"mini_tiktok/pkg/errno"
+	"mini_tiktok/cmd/api/biz/mw"
 )
 
 func rootMw() []app.HandlerFunc {
 	// your code...
 	return []app.HandlerFunc{
-		// use recovery mw
-		recovery.Recovery(recovery.WithRecoveryHandler(
-			func(ctx context.Context, c *app.RequestContext, err interface{}, stack []byte) {
-				hlog.SystemLogger().CtxErrorf(ctx, "[Recovery] err=%v\nstack=%s", err, stack)
-				c.JSON(consts.StatusInternalServerError, utils.H{
-					"code":    errno.ServiceErr.ErrCode,
-					"message": fmt.Sprintf("[Recovery] err=%v\nstack=%s", err, stack),
-				})
-			},
-		)),
-		// use requestid mw
+		// use gzip mw
+		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".jpg", ".mp4", ".png"})),
+		// use limiter mw
+		//limiter.AdaptiveLimit(limiter.WithCPUThreshold(900)),
+		// use requestId mw & bind with traceId
 		requestid.New(
 			requestid.WithGenerator(func(ctx context.Context, c *app.RequestContext) string {
 				traceID := trace.SpanFromContext(ctx).SpanContext().TraceID().String()
 				return traceID
 			}),
 		),
-		// use gzip mw
-		gzip.Gzip(gzip.DefaultCompression),
 	}
 }
 
@@ -58,7 +45,9 @@ func _userMw() []app.HandlerFunc {
 
 func _commentMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _comment_ctionMw() []app.HandlerFunc {
@@ -73,7 +62,9 @@ func _commentlistMw() []app.HandlerFunc {
 
 func _favoriteMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _favorite_ctionMw() []app.HandlerFunc {
@@ -88,7 +79,9 @@ func _favoritelistMw() []app.HandlerFunc {
 
 func _publishMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _publish_ctionMw() []app.HandlerFunc {
@@ -103,7 +96,9 @@ func _publishlistMw() []app.HandlerFunc {
 
 func _relationMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _relation_ctionMw() []app.HandlerFunc {

@@ -14,11 +14,7 @@ import (
 	"mini_tiktok/pkg/mw"
 )
 
-var videoService videoservice.Client
-
-func GetVideoClient() videoservice.Client {
-	return videoService
-}
+var VideoRpcClient videoservice.Client
 
 func initVideo() {
 	sc := []constant.ServerConfig{
@@ -61,5 +57,5 @@ func initVideo() {
 	if err != nil {
 		panic(err)
 	}
-	videoService = c
+	VideoRpcClient = c
 }
