@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package="videoService";
+option go_package="videoservice";
 package service.VideoService;
 
 service VideoService {

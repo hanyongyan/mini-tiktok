@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
-	"gorm.io/gen/examples/dal/query"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/plugin/opentelemetry/logging/logrus"
 	"gorm.io/plugin/opentelemetry/tracing"
+	"log"
+	"mini_tiktok/pkg/dal/query"
 	"time"
 )
 
@@ -41,6 +42,9 @@ func Init() {
 
 	if err := db.Use(tracing.NewPlugin()); err != nil {
 		panic(err)
+	}
+	if db == nil {
+		log.Println("db is nil")
 	}
 	query.SetDefault(db)
 }

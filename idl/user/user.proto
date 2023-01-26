@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package="userService";
+option go_package="userservice";
 package service.UserService;
 
 service UserService {

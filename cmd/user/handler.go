@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"mini_tiktok/cmd/user/utils"
-	"mini_tiktok/kitex_gen/userService"
+	userservice "mini_tiktok/kitex_gen/userservice"
 	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
 	jwtutil "mini_tiktok/pkg/utils"
@@ -14,14 +14,22 @@ import (
 type UserServiceImpl struct{}
 
 // Login implements the UserServiceImpl interface.
-func (s *UserServiceImpl) Login(ctx context.Context, req *userService.DouyinUserLoginRequest) (resp *userService.DouyinUserLoginResponse, err error) {
+func (s *UserServiceImpl) Login(ctx context.Context, req *userservice.DouyinUserLoginRequest) (resp *userservice.DouyinUserLoginResponse, err error) {
+	resp = &userservice.DouyinUserLoginResponse{}
 	q := query.Q
-	checkRes, err := utils.CheckUser(q, req.Username, req.Password)
-	token, err := jwtutil.CreateToken(checkRes.ID)
-	if err != nil {
+	checkRes, err2 := utils.CheckUser(q, req.Username, req.Password)
+	if err2 != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err2.Error()
 		return
 	}
-	resp = &userService.DouyinUserLoginResponse{
+	token, err2 := jwtutil.CreateToken(checkRes.ID)
+	if err2 != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err2.Error()
+		return
+	}
+	resp = &userservice.DouyinUserLoginResponse{
 		StatusCode: 0,
 		StatusMsg:  "登陆成功",
 		UserId:     checkRes.ID,
@@ -31,7 +39,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *userService.DouyinUser
 }
 
 // Register implements the UserServiceImpl interface.
-func (s *UserServiceImpl) Register(ctx context.Context, req *userService.DouyinUserRegisterRequest) (resp *userService.DouyinUserRegisterResponse, err error) {
+func (s *UserServiceImpl) Register(ctx context.Context, req *userservice.DouyinUserRegisterRequest) (resp *userservice.DouyinUserRegisterResponse, err error) {
 	q := query.Q
 	checkRes, _ := utils.CheckUser(q, req.Username, req.Password)
 	if checkRes != nil {
@@ -49,7 +57,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *userService.DouyinU
 		err = fmt.Errorf("token生成失败: %w", err)
 		return
 	}
-	resp = &userService.DouyinUserRegisterResponse{
+	resp = &userservice.DouyinUserRegisterResponse{
 		StatusCode: 0,
 		StatusMsg:  "登录成功",
 		UserId:     newUser.ID,
@@ -59,7 +67,7 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *userService.DouyinU
 }
 
 // Info implements the UserServiceImpl interface.
-func (s *UserServiceImpl) Info(ctx context.Context, req *userService.DouyinUserRequest) (resp *userService.DouyinUserResponse, err error) {
+func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserRequest) (resp *userservice.DouyinUserResponse, err error) {
 	u := query.Q.TUser
 	userInfo, err := u.WithContext(context.Background()).Where(u.ID.Eq(req.UserId)).First()
 	if err != nil {
@@ -80,10 +88,10 @@ func (s *UserServiceImpl) Info(ctx context.Context, req *userService.DouyinUserR
 	if findFollowRes != nil {
 		isFollow = true
 	}
-	resp = &userService.DouyinUserResponse{
+	resp = &userservice.DouyinUserResponse{
 		StatusCode: 0,
 		StatusMsg:  "",
-		User: &userService.User{
+		User: &userservice.User{
 			Id:            userInfo.ID,
 			Name:          userInfo.Name,
 			FollowCount:   userInfo.FollowCount,
@@ -95,25 +103,25 @@ func (s *UserServiceImpl) Info(ctx context.Context, req *userService.DouyinUserR
 }
 
 // Action implements the UserServiceImpl interface.
-func (s *UserServiceImpl) Action(ctx context.Context, req *userService.DouyinRelationActionRequest) (resp *userService.DouyinRelationActionResponse, err error) {
+func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRelationActionRequest) (resp *userservice.DouyinRelationActionResponse, err error) {
 	// TODO: Your code here...
 	return
 }
 
 // FollowList implements the UserServiceImpl interface.
-func (s *UserServiceImpl) FollowList(ctx context.Context, req *userService.DouyinRelationFollowListRequest) (resp *userService.DouyinRelationFollowListResponse, err error) {
+func (s *UserServiceImpl) FollowList(ctx context.Context, req *userservice.DouyinRelationFollowListRequest) (resp *userservice.DouyinRelationFollowListResponse, err error) {
 	// TODO: Your code here...
 	return
 }
 
 // FollowerList implements the UserServiceImpl interface.
-func (s *UserServiceImpl) FollowerList(ctx context.Context, req *userService.DouyinRelationFollowerListRequest) (resp *userService.DouyinRelationFollowerListResponse, err error) {
+func (s *UserServiceImpl) FollowerList(ctx context.Context, req *userservice.DouyinRelationFollowerListRequest) (resp *userservice.DouyinRelationFollowerListResponse, err error) {
 	// TODO: Your code here...
 	return
 }
 
 // FriendList implements the UserServiceImpl interface.
-func (s *UserServiceImpl) FriendList(ctx context.Context, req *userService.DouyinRelationFriendListRequest) (resp *userService.DouyinRelationFriendListResponse, err error) {
+func (s *UserServiceImpl) FriendList(ctx context.Context, req *userservice.DouyinRelationFriendListRequest) (resp *userservice.DouyinRelationFriendListResponse, err error) {
 	// TODO: Your code here...
 	return
 }

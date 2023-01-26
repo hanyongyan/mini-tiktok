@@ -9,7 +9,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"mini_tiktok/kitex_gen/userService/userservice"
+	"mini_tiktok/kitex_gen/userservice/userservice"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/mw"
 )
@@ -49,7 +49,7 @@ func initUser() {
 	c, err := userservice.NewClient(
 		consts.UserServiceName,
 		client.WithResolver(resolver.NewNacosResolver(r)),
-		client.WithMuxConnection(1),
+		//client.WithMuxConnection(1),
 		client.WithMiddleware(mw.CommonMiddleware),
 		client.WithInstanceMW(mw.ClientMiddleware),
 		client.WithSuite(tracing.NewClientSuite()),

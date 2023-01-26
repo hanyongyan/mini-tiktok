@@ -10,8 +10,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
-	"mini_tiktok/kitex_gen/userService"
-	"mini_tiktok/pkg/errno"
+	userservice "mini_tiktok/kitex_gen/userservice"
+
 	"strconv"
 )
 
@@ -42,12 +42,12 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userService.DouyinUserRegisterRequest{
+	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userservice.DouyinUserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{"code": errno.AuthorizationFailedErr, "message": err.Error()})
+		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
 		return
 	}
 	resp := &api.UserRegisterResp{
@@ -70,17 +70,21 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-	userClient := rpc.UserRpcClient
-	if userClient == nil {
-		hlog.Info("user Client is nil")
-		return
-	}
-	loginResponse, err := userClient.Login(context.Background(), &userService.DouyinUserLoginRequest{
+	hlog.Info("start call login rpc api")
+	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userservice.DouyinUserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
+	hlog.Info("call login rpc api end")
 	if err != nil {
+		hlog.Error("error occur", err)
 		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
+		return
+	}
+	if loginResponse == nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"status": "nil",
+		})
 		return
 	}
 	resp := &api.UserLoginResp{
@@ -89,6 +93,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		UserID:        loginResponse.UserId,
 		Token:         loginResponse.Token,
 	}
+	hlog.Infof("get resp: %+v", loginResponse)
 
 	c.JSON(consts.StatusOK, resp)
 }
@@ -105,11 +110,11 @@ func User(ctx context.Context, c *app.RequestContext) {
 	}
 
 	userId, _ := strconv.Atoi(req.UserID)
-	info, err := rpc.UserRpcClient.Info(context.Background(), &userService.DouyinUserRequest{UserId: int64(userId), Token: req.Token})
+	info, err := rpc.UserRpcClient.Info(context.Background(), &userservice.DouyinUserRequest{UserId: int64(userId), Token: req.Token})
 	if err != nil {
 		c.JSON(consts.StatusOK, utils.H{
 			"code":    0,
-			"message": err,
+			"message": err.Error(),
 		})
 		return
 	}
