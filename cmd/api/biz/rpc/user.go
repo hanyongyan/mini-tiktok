@@ -9,7 +9,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"mini_tiktok/kitex_gen/userService/userservice"
+	"mini_tiktok/kitex_gen/userservice/userservice"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/mw"
 )

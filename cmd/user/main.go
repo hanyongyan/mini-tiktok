@@ -14,10 +14,11 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"mini_tiktok/cmd/user/rpc"
-	"mini_tiktok/kitex_gen/userService/userservice"
+	"mini_tiktok/kitex_gen/userservice/userservice"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
+	"mini_tiktok/pkg/mw"
 	"net"
 )
 
@@ -70,8 +71,8 @@ func main() {
 	svr := userservice.NewServer(new(UserServiceImpl),
 		server.WithServiceAddr(addr),
 		//server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
-		//server.WithMiddleware(mw.CommonMiddleware),
-		//server.WithMiddleware(mw.ServerMiddleware),
+		server.WithMiddleware(mw.CommonMiddleware),
+		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.UserServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),
 		server.WithRegistry(registry.NewNacosRegistry(cli)),

@@ -9,7 +9,7 @@ import (
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"
 	proto "google.golang.org/protobuf/proto"
-	videoService "mini_tiktok/kitex_gen/videoService"
+	videoservice "mini_tiktok/kitex_gen/videoservice"
 )
 
 func serviceInfo() *kitex.ServiceInfo {
@@ -20,7 +20,7 @@ var videoServiceServiceInfo = NewServiceInfo()
 
 func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "VideoService"
-	handlerType := (*videoService.VideoService)(nil)
+	handlerType := (*videoservice.VideoService)(nil)
 	methods := map[string]kitex.MethodInfo{
 		"PublishAction":  kitex.NewMethodInfo(publishActionHandler, newPublishActionArgs, newPublishActionResult, false),
 		"Feed":           kitex.NewMethodInfo(feedHandler, newFeedArgs, newFeedResult, false),
@@ -48,11 +48,11 @@ func publishActionHandler(ctx context.Context, handler interface{}, arg, result 
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(videoService.DouyinPublishActionRequest)
+		req := new(videoservice.DouyinPublishActionRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(videoService.VideoService).PublishAction(ctx, req)
+		resp, err := handler.(videoservice.VideoService).PublishAction(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -60,7 +60,7 @@ func publishActionHandler(ctx context.Context, handler interface{}, arg, result 
 			return err
 		}
 	case *PublishActionArgs:
-		success, err := handler.(videoService.VideoService).PublishAction(ctx, s.Req)
+		success, err := handler.(videoservice.VideoService).PublishAction(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -78,12 +78,12 @@ func newPublishActionResult() interface{} {
 }
 
 type PublishActionArgs struct {
-	Req *videoService.DouyinPublishActionRequest
+	Req *videoservice.DouyinPublishActionRequest
 }
 
 func (p *PublishActionArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(videoService.DouyinPublishActionRequest)
+		p.Req = new(videoservice.DouyinPublishActionRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -110,7 +110,7 @@ func (p *PublishActionArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *PublishActionArgs) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinPublishActionRequest)
+	msg := new(videoservice.DouyinPublishActionRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -118,9 +118,9 @@ func (p *PublishActionArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var PublishActionArgs_Req_DEFAULT *videoService.DouyinPublishActionRequest
+var PublishActionArgs_Req_DEFAULT *videoservice.DouyinPublishActionRequest
 
-func (p *PublishActionArgs) GetReq() *videoService.DouyinPublishActionRequest {
+func (p *PublishActionArgs) GetReq() *videoservice.DouyinPublishActionRequest {
 	if !p.IsSetReq() {
 		return PublishActionArgs_Req_DEFAULT
 	}
@@ -132,14 +132,14 @@ func (p *PublishActionArgs) IsSetReq() bool {
 }
 
 type PublishActionResult struct {
-	Success *videoService.DouyinPublishActionResponse
+	Success *videoservice.DouyinPublishActionResponse
 }
 
-var PublishActionResult_Success_DEFAULT *videoService.DouyinPublishActionResponse
+var PublishActionResult_Success_DEFAULT *videoservice.DouyinPublishActionResponse
 
 func (p *PublishActionResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(videoService.DouyinPublishActionResponse)
+		p.Success = new(videoservice.DouyinPublishActionResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -166,7 +166,7 @@ func (p *PublishActionResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *PublishActionResult) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinPublishActionResponse)
+	msg := new(videoservice.DouyinPublishActionResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func (p *PublishActionResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *PublishActionResult) GetSuccess() *videoService.DouyinPublishActionResponse {
+func (p *PublishActionResult) GetSuccess() *videoservice.DouyinPublishActionResponse {
 	if !p.IsSetSuccess() {
 		return PublishActionResult_Success_DEFAULT
 	}
@@ -182,7 +182,7 @@ func (p *PublishActionResult) GetSuccess() *videoService.DouyinPublishActionResp
 }
 
 func (p *PublishActionResult) SetSuccess(x interface{}) {
-	p.Success = x.(*videoService.DouyinPublishActionResponse)
+	p.Success = x.(*videoservice.DouyinPublishActionResponse)
 }
 
 func (p *PublishActionResult) IsSetSuccess() bool {
@@ -193,11 +193,11 @@ func feedHandler(ctx context.Context, handler interface{}, arg, result interface
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(videoService.DouyinFeedRequest)
+		req := new(videoservice.DouyinFeedRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(videoService.VideoService).Feed(ctx, req)
+		resp, err := handler.(videoservice.VideoService).Feed(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -205,7 +205,7 @@ func feedHandler(ctx context.Context, handler interface{}, arg, result interface
 			return err
 		}
 	case *FeedArgs:
-		success, err := handler.(videoService.VideoService).Feed(ctx, s.Req)
+		success, err := handler.(videoservice.VideoService).Feed(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -223,12 +223,12 @@ func newFeedResult() interface{} {
 }
 
 type FeedArgs struct {
-	Req *videoService.DouyinFeedRequest
+	Req *videoservice.DouyinFeedRequest
 }
 
 func (p *FeedArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(videoService.DouyinFeedRequest)
+		p.Req = new(videoservice.DouyinFeedRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -255,7 +255,7 @@ func (p *FeedArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FeedArgs) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinFeedRequest)
+	msg := new(videoservice.DouyinFeedRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -263,9 +263,9 @@ func (p *FeedArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var FeedArgs_Req_DEFAULT *videoService.DouyinFeedRequest
+var FeedArgs_Req_DEFAULT *videoservice.DouyinFeedRequest
 
-func (p *FeedArgs) GetReq() *videoService.DouyinFeedRequest {
+func (p *FeedArgs) GetReq() *videoservice.DouyinFeedRequest {
 	if !p.IsSetReq() {
 		return FeedArgs_Req_DEFAULT
 	}
@@ -277,14 +277,14 @@ func (p *FeedArgs) IsSetReq() bool {
 }
 
 type FeedResult struct {
-	Success *videoService.DouyinFeedResponse
+	Success *videoservice.DouyinFeedResponse
 }
 
-var FeedResult_Success_DEFAULT *videoService.DouyinFeedResponse
+var FeedResult_Success_DEFAULT *videoservice.DouyinFeedResponse
 
 func (p *FeedResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(videoService.DouyinFeedResponse)
+		p.Success = new(videoservice.DouyinFeedResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -311,7 +311,7 @@ func (p *FeedResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FeedResult) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinFeedResponse)
+	msg := new(videoservice.DouyinFeedResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -319,7 +319,7 @@ func (p *FeedResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *FeedResult) GetSuccess() *videoService.DouyinFeedResponse {
+func (p *FeedResult) GetSuccess() *videoservice.DouyinFeedResponse {
 	if !p.IsSetSuccess() {
 		return FeedResult_Success_DEFAULT
 	}
@@ -327,7 +327,7 @@ func (p *FeedResult) GetSuccess() *videoService.DouyinFeedResponse {
 }
 
 func (p *FeedResult) SetSuccess(x interface{}) {
-	p.Success = x.(*videoService.DouyinFeedResponse)
+	p.Success = x.(*videoservice.DouyinFeedResponse)
 }
 
 func (p *FeedResult) IsSetSuccess() bool {
@@ -338,11 +338,11 @@ func publishListHandler(ctx context.Context, handler interface{}, arg, result in
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(videoService.DouyinPublishListRequest)
+		req := new(videoservice.DouyinPublishListRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(videoService.VideoService).PublishList(ctx, req)
+		resp, err := handler.(videoservice.VideoService).PublishList(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -350,7 +350,7 @@ func publishListHandler(ctx context.Context, handler interface{}, arg, result in
 			return err
 		}
 	case *PublishListArgs:
-		success, err := handler.(videoService.VideoService).PublishList(ctx, s.Req)
+		success, err := handler.(videoservice.VideoService).PublishList(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -368,12 +368,12 @@ func newPublishListResult() interface{} {
 }
 
 type PublishListArgs struct {
-	Req *videoService.DouyinPublishListRequest
+	Req *videoservice.DouyinPublishListRequest
 }
 
 func (p *PublishListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(videoService.DouyinPublishListRequest)
+		p.Req = new(videoservice.DouyinPublishListRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -400,7 +400,7 @@ func (p *PublishListArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *PublishListArgs) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinPublishListRequest)
+	msg := new(videoservice.DouyinPublishListRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -408,9 +408,9 @@ func (p *PublishListArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var PublishListArgs_Req_DEFAULT *videoService.DouyinPublishListRequest
+var PublishListArgs_Req_DEFAULT *videoservice.DouyinPublishListRequest
 
-func (p *PublishListArgs) GetReq() *videoService.DouyinPublishListRequest {
+func (p *PublishListArgs) GetReq() *videoservice.DouyinPublishListRequest {
 	if !p.IsSetReq() {
 		return PublishListArgs_Req_DEFAULT
 	}
@@ -422,14 +422,14 @@ func (p *PublishListArgs) IsSetReq() bool {
 }
 
 type PublishListResult struct {
-	Success *videoService.DouyinPublishListResponse
+	Success *videoservice.DouyinPublishListResponse
 }
 
-var PublishListResult_Success_DEFAULT *videoService.DouyinPublishListResponse
+var PublishListResult_Success_DEFAULT *videoservice.DouyinPublishListResponse
 
 func (p *PublishListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(videoService.DouyinPublishListResponse)
+		p.Success = new(videoservice.DouyinPublishListResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -456,7 +456,7 @@ func (p *PublishListResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *PublishListResult) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinPublishListResponse)
+	msg := new(videoservice.DouyinPublishListResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -464,7 +464,7 @@ func (p *PublishListResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *PublishListResult) GetSuccess() *videoService.DouyinPublishListResponse {
+func (p *PublishListResult) GetSuccess() *videoservice.DouyinPublishListResponse {
 	if !p.IsSetSuccess() {
 		return PublishListResult_Success_DEFAULT
 	}
@@ -472,7 +472,7 @@ func (p *PublishListResult) GetSuccess() *videoService.DouyinPublishListResponse
 }
 
 func (p *PublishListResult) SetSuccess(x interface{}) {
-	p.Success = x.(*videoService.DouyinPublishListResponse)
+	p.Success = x.(*videoservice.DouyinPublishListResponse)
 }
 
 func (p *PublishListResult) IsSetSuccess() bool {
@@ -483,11 +483,11 @@ func favoriteActionHandler(ctx context.Context, handler interface{}, arg, result
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(videoService.DouyinFavoriteActionRequest)
+		req := new(videoservice.DouyinFavoriteActionRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(videoService.VideoService).FavoriteAction(ctx, req)
+		resp, err := handler.(videoservice.VideoService).FavoriteAction(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -495,7 +495,7 @@ func favoriteActionHandler(ctx context.Context, handler interface{}, arg, result
 			return err
 		}
 	case *FavoriteActionArgs:
-		success, err := handler.(videoService.VideoService).FavoriteAction(ctx, s.Req)
+		success, err := handler.(videoservice.VideoService).FavoriteAction(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -513,12 +513,12 @@ func newFavoriteActionResult() interface{} {
 }
 
 type FavoriteActionArgs struct {
-	Req *videoService.DouyinFavoriteActionRequest
+	Req *videoservice.DouyinFavoriteActionRequest
 }
 
 func (p *FavoriteActionArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(videoService.DouyinFavoriteActionRequest)
+		p.Req = new(videoservice.DouyinFavoriteActionRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -545,7 +545,7 @@ func (p *FavoriteActionArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FavoriteActionArgs) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinFavoriteActionRequest)
+	msg := new(videoservice.DouyinFavoriteActionRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -553,9 +553,9 @@ func (p *FavoriteActionArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var FavoriteActionArgs_Req_DEFAULT *videoService.DouyinFavoriteActionRequest
+var FavoriteActionArgs_Req_DEFAULT *videoservice.DouyinFavoriteActionRequest
 
-func (p *FavoriteActionArgs) GetReq() *videoService.DouyinFavoriteActionRequest {
+func (p *FavoriteActionArgs) GetReq() *videoservice.DouyinFavoriteActionRequest {
 	if !p.IsSetReq() {
 		return FavoriteActionArgs_Req_DEFAULT
 	}
@@ -567,14 +567,14 @@ func (p *FavoriteActionArgs) IsSetReq() bool {
 }
 
 type FavoriteActionResult struct {
-	Success *videoService.DouyinFavoriteActionResponse
+	Success *videoservice.DouyinFavoriteActionResponse
 }
 
-var FavoriteActionResult_Success_DEFAULT *videoService.DouyinFavoriteActionResponse
+var FavoriteActionResult_Success_DEFAULT *videoservice.DouyinFavoriteActionResponse
 
 func (p *FavoriteActionResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(videoService.DouyinFavoriteActionResponse)
+		p.Success = new(videoservice.DouyinFavoriteActionResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -601,7 +601,7 @@ func (p *FavoriteActionResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FavoriteActionResult) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinFavoriteActionResponse)
+	msg := new(videoservice.DouyinFavoriteActionResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -609,7 +609,7 @@ func (p *FavoriteActionResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *FavoriteActionResult) GetSuccess() *videoService.DouyinFavoriteActionResponse {
+func (p *FavoriteActionResult) GetSuccess() *videoservice.DouyinFavoriteActionResponse {
 	if !p.IsSetSuccess() {
 		return FavoriteActionResult_Success_DEFAULT
 	}
@@ -617,7 +617,7 @@ func (p *FavoriteActionResult) GetSuccess() *videoService.DouyinFavoriteActionRe
 }
 
 func (p *FavoriteActionResult) SetSuccess(x interface{}) {
-	p.Success = x.(*videoService.DouyinFavoriteActionResponse)
+	p.Success = x.(*videoservice.DouyinFavoriteActionResponse)
 }
 
 func (p *FavoriteActionResult) IsSetSuccess() bool {
@@ -628,11 +628,11 @@ func favoriteListHandler(ctx context.Context, handler interface{}, arg, result i
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(videoService.DouyinFavoriteListRequest)
+		req := new(videoservice.DouyinFavoriteListRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(videoService.VideoService).FavoriteList(ctx, req)
+		resp, err := handler.(videoservice.VideoService).FavoriteList(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -640,7 +640,7 @@ func favoriteListHandler(ctx context.Context, handler interface{}, arg, result i
 			return err
 		}
 	case *FavoriteListArgs:
-		success, err := handler.(videoService.VideoService).FavoriteList(ctx, s.Req)
+		success, err := handler.(videoservice.VideoService).FavoriteList(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -658,12 +658,12 @@ func newFavoriteListResult() interface{} {
 }
 
 type FavoriteListArgs struct {
-	Req *videoService.DouyinFavoriteListRequest
+	Req *videoservice.DouyinFavoriteListRequest
 }
 
 func (p *FavoriteListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(videoService.DouyinFavoriteListRequest)
+		p.Req = new(videoservice.DouyinFavoriteListRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -690,7 +690,7 @@ func (p *FavoriteListArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FavoriteListArgs) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinFavoriteListRequest)
+	msg := new(videoservice.DouyinFavoriteListRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -698,9 +698,9 @@ func (p *FavoriteListArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var FavoriteListArgs_Req_DEFAULT *videoService.DouyinFavoriteListRequest
+var FavoriteListArgs_Req_DEFAULT *videoservice.DouyinFavoriteListRequest
 
-func (p *FavoriteListArgs) GetReq() *videoService.DouyinFavoriteListRequest {
+func (p *FavoriteListArgs) GetReq() *videoservice.DouyinFavoriteListRequest {
 	if !p.IsSetReq() {
 		return FavoriteListArgs_Req_DEFAULT
 	}
@@ -712,14 +712,14 @@ func (p *FavoriteListArgs) IsSetReq() bool {
 }
 
 type FavoriteListResult struct {
-	Success *videoService.DouyinFavoriteListResponse
+	Success *videoservice.DouyinFavoriteListResponse
 }
 
-var FavoriteListResult_Success_DEFAULT *videoService.DouyinFavoriteListResponse
+var FavoriteListResult_Success_DEFAULT *videoservice.DouyinFavoriteListResponse
 
 func (p *FavoriteListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(videoService.DouyinFavoriteListResponse)
+		p.Success = new(videoservice.DouyinFavoriteListResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -746,7 +746,7 @@ func (p *FavoriteListResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FavoriteListResult) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinFavoriteListResponse)
+	msg := new(videoservice.DouyinFavoriteListResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -754,7 +754,7 @@ func (p *FavoriteListResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *FavoriteListResult) GetSuccess() *videoService.DouyinFavoriteListResponse {
+func (p *FavoriteListResult) GetSuccess() *videoservice.DouyinFavoriteListResponse {
 	if !p.IsSetSuccess() {
 		return FavoriteListResult_Success_DEFAULT
 	}
@@ -762,7 +762,7 @@ func (p *FavoriteListResult) GetSuccess() *videoService.DouyinFavoriteListRespon
 }
 
 func (p *FavoriteListResult) SetSuccess(x interface{}) {
-	p.Success = x.(*videoService.DouyinFavoriteListResponse)
+	p.Success = x.(*videoservice.DouyinFavoriteListResponse)
 }
 
 func (p *FavoriteListResult) IsSetSuccess() bool {
@@ -773,11 +773,11 @@ func commentActionHandler(ctx context.Context, handler interface{}, arg, result 
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(videoService.DouyinCommentActionRequest)
+		req := new(videoservice.DouyinCommentActionRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(videoService.VideoService).CommentAction(ctx, req)
+		resp, err := handler.(videoservice.VideoService).CommentAction(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -785,7 +785,7 @@ func commentActionHandler(ctx context.Context, handler interface{}, arg, result 
 			return err
 		}
 	case *CommentActionArgs:
-		success, err := handler.(videoService.VideoService).CommentAction(ctx, s.Req)
+		success, err := handler.(videoservice.VideoService).CommentAction(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -803,12 +803,12 @@ func newCommentActionResult() interface{} {
 }
 
 type CommentActionArgs struct {
-	Req *videoService.DouyinCommentActionRequest
+	Req *videoservice.DouyinCommentActionRequest
 }
 
 func (p *CommentActionArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(videoService.DouyinCommentActionRequest)
+		p.Req = new(videoservice.DouyinCommentActionRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -835,7 +835,7 @@ func (p *CommentActionArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *CommentActionArgs) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinCommentActionRequest)
+	msg := new(videoservice.DouyinCommentActionRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -843,9 +843,9 @@ func (p *CommentActionArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var CommentActionArgs_Req_DEFAULT *videoService.DouyinCommentActionRequest
+var CommentActionArgs_Req_DEFAULT *videoservice.DouyinCommentActionRequest
 
-func (p *CommentActionArgs) GetReq() *videoService.DouyinCommentActionRequest {
+func (p *CommentActionArgs) GetReq() *videoservice.DouyinCommentActionRequest {
 	if !p.IsSetReq() {
 		return CommentActionArgs_Req_DEFAULT
 	}
@@ -857,14 +857,14 @@ func (p *CommentActionArgs) IsSetReq() bool {
 }
 
 type CommentActionResult struct {
-	Success *videoService.DouyinCommentActionResponse
+	Success *videoservice.DouyinCommentActionResponse
 }
 
-var CommentActionResult_Success_DEFAULT *videoService.DouyinCommentActionResponse
+var CommentActionResult_Success_DEFAULT *videoservice.DouyinCommentActionResponse
 
 func (p *CommentActionResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(videoService.DouyinCommentActionResponse)
+		p.Success = new(videoservice.DouyinCommentActionResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -891,7 +891,7 @@ func (p *CommentActionResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *CommentActionResult) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinCommentActionResponse)
+	msg := new(videoservice.DouyinCommentActionResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -899,7 +899,7 @@ func (p *CommentActionResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *CommentActionResult) GetSuccess() *videoService.DouyinCommentActionResponse {
+func (p *CommentActionResult) GetSuccess() *videoservice.DouyinCommentActionResponse {
 	if !p.IsSetSuccess() {
 		return CommentActionResult_Success_DEFAULT
 	}
@@ -907,7 +907,7 @@ func (p *CommentActionResult) GetSuccess() *videoService.DouyinCommentActionResp
 }
 
 func (p *CommentActionResult) SetSuccess(x interface{}) {
-	p.Success = x.(*videoService.DouyinCommentActionResponse)
+	p.Success = x.(*videoservice.DouyinCommentActionResponse)
 }
 
 func (p *CommentActionResult) IsSetSuccess() bool {
@@ -918,11 +918,11 @@ func commentListHandler(ctx context.Context, handler interface{}, arg, result in
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(videoService.DouyinCommentListRequest)
+		req := new(videoservice.DouyinCommentListRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(videoService.VideoService).CommentList(ctx, req)
+		resp, err := handler.(videoservice.VideoService).CommentList(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -930,7 +930,7 @@ func commentListHandler(ctx context.Context, handler interface{}, arg, result in
 			return err
 		}
 	case *CommentListArgs:
-		success, err := handler.(videoService.VideoService).CommentList(ctx, s.Req)
+		success, err := handler.(videoservice.VideoService).CommentList(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -948,12 +948,12 @@ func newCommentListResult() interface{} {
 }
 
 type CommentListArgs struct {
-	Req *videoService.DouyinCommentListRequest
+	Req *videoservice.DouyinCommentListRequest
 }
 
 func (p *CommentListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(videoService.DouyinCommentListRequest)
+		p.Req = new(videoservice.DouyinCommentListRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -980,7 +980,7 @@ func (p *CommentListArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *CommentListArgs) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinCommentListRequest)
+	msg := new(videoservice.DouyinCommentListRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -988,9 +988,9 @@ func (p *CommentListArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var CommentListArgs_Req_DEFAULT *videoService.DouyinCommentListRequest
+var CommentListArgs_Req_DEFAULT *videoservice.DouyinCommentListRequest
 
-func (p *CommentListArgs) GetReq() *videoService.DouyinCommentListRequest {
+func (p *CommentListArgs) GetReq() *videoservice.DouyinCommentListRequest {
 	if !p.IsSetReq() {
 		return CommentListArgs_Req_DEFAULT
 	}
@@ -1002,14 +1002,14 @@ func (p *CommentListArgs) IsSetReq() bool {
 }
 
 type CommentListResult struct {
-	Success *videoService.DouyinCommentListResponse
+	Success *videoservice.DouyinCommentListResponse
 }
 
-var CommentListResult_Success_DEFAULT *videoService.DouyinCommentListResponse
+var CommentListResult_Success_DEFAULT *videoservice.DouyinCommentListResponse
 
 func (p *CommentListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(videoService.DouyinCommentListResponse)
+		p.Success = new(videoservice.DouyinCommentListResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -1036,7 +1036,7 @@ func (p *CommentListResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *CommentListResult) Unmarshal(in []byte) error {
-	msg := new(videoService.DouyinCommentListResponse)
+	msg := new(videoservice.DouyinCommentListResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -1044,7 +1044,7 @@ func (p *CommentListResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *CommentListResult) GetSuccess() *videoService.DouyinCommentListResponse {
+func (p *CommentListResult) GetSuccess() *videoservice.DouyinCommentListResponse {
 	if !p.IsSetSuccess() {
 		return CommentListResult_Success_DEFAULT
 	}
@@ -1052,7 +1052,7 @@ func (p *CommentListResult) GetSuccess() *videoService.DouyinCommentListResponse
 }
 
 func (p *CommentListResult) SetSuccess(x interface{}) {
-	p.Success = x.(*videoService.DouyinCommentListResponse)
+	p.Success = x.(*videoservice.DouyinCommentListResponse)
 }
 
 func (p *CommentListResult) IsSetSuccess() bool {
@@ -1069,7 +1069,7 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
-func (p *kClient) PublishAction(ctx context.Context, Req *videoService.DouyinPublishActionRequest) (r *videoService.DouyinPublishActionResponse, err error) {
+func (p *kClient) PublishAction(ctx context.Context, Req *videoservice.DouyinPublishActionRequest) (r *videoservice.DouyinPublishActionResponse, err error) {
 	var _args PublishActionArgs
 	_args.Req = Req
 	var _result PublishActionResult
@@ -1079,7 +1079,7 @@ func (p *kClient) PublishAction(ctx context.Context, Req *videoService.DouyinPub
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) Feed(ctx context.Context, Req *videoService.DouyinFeedRequest) (r *videoService.DouyinFeedResponse, err error) {
+func (p *kClient) Feed(ctx context.Context, Req *videoservice.DouyinFeedRequest) (r *videoservice.DouyinFeedResponse, err error) {
 	var _args FeedArgs
 	_args.Req = Req
 	var _result FeedResult
@@ -1089,7 +1089,7 @@ func (p *kClient) Feed(ctx context.Context, Req *videoService.DouyinFeedRequest)
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) PublishList(ctx context.Context, Req *videoService.DouyinPublishListRequest) (r *videoService.DouyinPublishListResponse, err error) {
+func (p *kClient) PublishList(ctx context.Context, Req *videoservice.DouyinPublishListRequest) (r *videoservice.DouyinPublishListResponse, err error) {
 	var _args PublishListArgs
 	_args.Req = Req
 	var _result PublishListResult
@@ -1099,7 +1099,7 @@ func (p *kClient) PublishList(ctx context.Context, Req *videoService.DouyinPubli
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) FavoriteAction(ctx context.Context, Req *videoService.DouyinFavoriteActionRequest) (r *videoService.DouyinFavoriteActionResponse, err error) {
+func (p *kClient) FavoriteAction(ctx context.Context, Req *videoservice.DouyinFavoriteActionRequest) (r *videoservice.DouyinFavoriteActionResponse, err error) {
 	var _args FavoriteActionArgs
 	_args.Req = Req
 	var _result FavoriteActionResult
@@ -1109,7 +1109,7 @@ func (p *kClient) FavoriteAction(ctx context.Context, Req *videoService.DouyinFa
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) FavoriteList(ctx context.Context, Req *videoService.DouyinFavoriteListRequest) (r *videoService.DouyinFavoriteListResponse, err error) {
+func (p *kClient) FavoriteList(ctx context.Context, Req *videoservice.DouyinFavoriteListRequest) (r *videoservice.DouyinFavoriteListResponse, err error) {
 	var _args FavoriteListArgs
 	_args.Req = Req
 	var _result FavoriteListResult
@@ -1119,7 +1119,7 @@ func (p *kClient) FavoriteList(ctx context.Context, Req *videoService.DouyinFavo
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) CommentAction(ctx context.Context, Req *videoService.DouyinCommentActionRequest) (r *videoService.DouyinCommentActionResponse, err error) {
+func (p *kClient) CommentAction(ctx context.Context, Req *videoservice.DouyinCommentActionRequest) (r *videoservice.DouyinCommentActionResponse, err error) {
 	var _args CommentActionArgs
 	_args.Req = Req
 	var _result CommentActionResult
@@ -1129,7 +1129,7 @@ func (p *kClient) CommentAction(ctx context.Context, Req *videoService.DouyinCom
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) CommentList(ctx context.Context, Req *videoService.DouyinCommentListRequest) (r *videoService.DouyinCommentListResponse, err error) {
+func (p *kClient) CommentList(ctx context.Context, Req *videoservice.DouyinCommentListRequest) (r *videoservice.DouyinCommentListResponse, err error) {
 	var _args CommentListArgs
 	_args.Req = Req
 	var _result CommentListResult

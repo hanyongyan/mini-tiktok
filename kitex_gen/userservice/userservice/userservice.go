@@ -9,7 +9,7 @@ import (
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
 	streaming "github.com/cloudwego/kitex/pkg/streaming"
 	proto "google.golang.org/protobuf/proto"
-	userService "mini_tiktok/kitex_gen/userService"
+	userservice "mini_tiktok/kitex_gen/userservice"
 )
 
 func serviceInfo() *kitex.ServiceInfo {
@@ -20,7 +20,7 @@ var userServiceServiceInfo = NewServiceInfo()
 
 func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "UserService"
-	handlerType := (*userService.UserService)(nil)
+	handlerType := (*userservice.UserService)(nil)
 	methods := map[string]kitex.MethodInfo{
 		"Login":        kitex.NewMethodInfo(loginHandler, newLoginArgs, newLoginResult, false),
 		"Register":     kitex.NewMethodInfo(registerHandler, newRegisterArgs, newRegisterResult, false),
@@ -48,11 +48,11 @@ func loginHandler(ctx context.Context, handler interface{}, arg, result interfac
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(userService.DouyinUserLoginRequest)
+		req := new(userservice.DouyinUserLoginRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(userService.UserService).Login(ctx, req)
+		resp, err := handler.(userservice.UserService).Login(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -60,7 +60,7 @@ func loginHandler(ctx context.Context, handler interface{}, arg, result interfac
 			return err
 		}
 	case *LoginArgs:
-		success, err := handler.(userService.UserService).Login(ctx, s.Req)
+		success, err := handler.(userservice.UserService).Login(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -78,12 +78,12 @@ func newLoginResult() interface{} {
 }
 
 type LoginArgs struct {
-	Req *userService.DouyinUserLoginRequest
+	Req *userservice.DouyinUserLoginRequest
 }
 
 func (p *LoginArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(userService.DouyinUserLoginRequest)
+		p.Req = new(userservice.DouyinUserLoginRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -110,7 +110,7 @@ func (p *LoginArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *LoginArgs) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinUserLoginRequest)
+	msg := new(userservice.DouyinUserLoginRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -118,9 +118,9 @@ func (p *LoginArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var LoginArgs_Req_DEFAULT *userService.DouyinUserLoginRequest
+var LoginArgs_Req_DEFAULT *userservice.DouyinUserLoginRequest
 
-func (p *LoginArgs) GetReq() *userService.DouyinUserLoginRequest {
+func (p *LoginArgs) GetReq() *userservice.DouyinUserLoginRequest {
 	if !p.IsSetReq() {
 		return LoginArgs_Req_DEFAULT
 	}
@@ -132,14 +132,14 @@ func (p *LoginArgs) IsSetReq() bool {
 }
 
 type LoginResult struct {
-	Success *userService.DouyinUserLoginResponse
+	Success *userservice.DouyinUserLoginResponse
 }
 
-var LoginResult_Success_DEFAULT *userService.DouyinUserLoginResponse
+var LoginResult_Success_DEFAULT *userservice.DouyinUserLoginResponse
 
 func (p *LoginResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(userService.DouyinUserLoginResponse)
+		p.Success = new(userservice.DouyinUserLoginResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -166,7 +166,7 @@ func (p *LoginResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *LoginResult) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinUserLoginResponse)
+	msg := new(userservice.DouyinUserLoginResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func (p *LoginResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *LoginResult) GetSuccess() *userService.DouyinUserLoginResponse {
+func (p *LoginResult) GetSuccess() *userservice.DouyinUserLoginResponse {
 	if !p.IsSetSuccess() {
 		return LoginResult_Success_DEFAULT
 	}
@@ -182,7 +182,7 @@ func (p *LoginResult) GetSuccess() *userService.DouyinUserLoginResponse {
 }
 
 func (p *LoginResult) SetSuccess(x interface{}) {
-	p.Success = x.(*userService.DouyinUserLoginResponse)
+	p.Success = x.(*userservice.DouyinUserLoginResponse)
 }
 
 func (p *LoginResult) IsSetSuccess() bool {
@@ -193,11 +193,11 @@ func registerHandler(ctx context.Context, handler interface{}, arg, result inter
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(userService.DouyinUserRegisterRequest)
+		req := new(userservice.DouyinUserRegisterRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(userService.UserService).Register(ctx, req)
+		resp, err := handler.(userservice.UserService).Register(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -205,7 +205,7 @@ func registerHandler(ctx context.Context, handler interface{}, arg, result inter
 			return err
 		}
 	case *RegisterArgs:
-		success, err := handler.(userService.UserService).Register(ctx, s.Req)
+		success, err := handler.(userservice.UserService).Register(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -223,12 +223,12 @@ func newRegisterResult() interface{} {
 }
 
 type RegisterArgs struct {
-	Req *userService.DouyinUserRegisterRequest
+	Req *userservice.DouyinUserRegisterRequest
 }
 
 func (p *RegisterArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(userService.DouyinUserRegisterRequest)
+		p.Req = new(userservice.DouyinUserRegisterRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -255,7 +255,7 @@ func (p *RegisterArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *RegisterArgs) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinUserRegisterRequest)
+	msg := new(userservice.DouyinUserRegisterRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -263,9 +263,9 @@ func (p *RegisterArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var RegisterArgs_Req_DEFAULT *userService.DouyinUserRegisterRequest
+var RegisterArgs_Req_DEFAULT *userservice.DouyinUserRegisterRequest
 
-func (p *RegisterArgs) GetReq() *userService.DouyinUserRegisterRequest {
+func (p *RegisterArgs) GetReq() *userservice.DouyinUserRegisterRequest {
 	if !p.IsSetReq() {
 		return RegisterArgs_Req_DEFAULT
 	}
@@ -277,14 +277,14 @@ func (p *RegisterArgs) IsSetReq() bool {
 }
 
 type RegisterResult struct {
-	Success *userService.DouyinUserRegisterResponse
+	Success *userservice.DouyinUserRegisterResponse
 }
 
-var RegisterResult_Success_DEFAULT *userService.DouyinUserRegisterResponse
+var RegisterResult_Success_DEFAULT *userservice.DouyinUserRegisterResponse
 
 func (p *RegisterResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(userService.DouyinUserRegisterResponse)
+		p.Success = new(userservice.DouyinUserRegisterResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -311,7 +311,7 @@ func (p *RegisterResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *RegisterResult) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinUserRegisterResponse)
+	msg := new(userservice.DouyinUserRegisterResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -319,7 +319,7 @@ func (p *RegisterResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *RegisterResult) GetSuccess() *userService.DouyinUserRegisterResponse {
+func (p *RegisterResult) GetSuccess() *userservice.DouyinUserRegisterResponse {
 	if !p.IsSetSuccess() {
 		return RegisterResult_Success_DEFAULT
 	}
@@ -327,7 +327,7 @@ func (p *RegisterResult) GetSuccess() *userService.DouyinUserRegisterResponse {
 }
 
 func (p *RegisterResult) SetSuccess(x interface{}) {
-	p.Success = x.(*userService.DouyinUserRegisterResponse)
+	p.Success = x.(*userservice.DouyinUserRegisterResponse)
 }
 
 func (p *RegisterResult) IsSetSuccess() bool {
@@ -338,11 +338,11 @@ func infoHandler(ctx context.Context, handler interface{}, arg, result interface
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(userService.DouyinUserRequest)
+		req := new(userservice.DouyinUserRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(userService.UserService).Info(ctx, req)
+		resp, err := handler.(userservice.UserService).Info(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -350,7 +350,7 @@ func infoHandler(ctx context.Context, handler interface{}, arg, result interface
 			return err
 		}
 	case *InfoArgs:
-		success, err := handler.(userService.UserService).Info(ctx, s.Req)
+		success, err := handler.(userservice.UserService).Info(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -368,12 +368,12 @@ func newInfoResult() interface{} {
 }
 
 type InfoArgs struct {
-	Req *userService.DouyinUserRequest
+	Req *userservice.DouyinUserRequest
 }
 
 func (p *InfoArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(userService.DouyinUserRequest)
+		p.Req = new(userservice.DouyinUserRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -400,7 +400,7 @@ func (p *InfoArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *InfoArgs) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinUserRequest)
+	msg := new(userservice.DouyinUserRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -408,9 +408,9 @@ func (p *InfoArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var InfoArgs_Req_DEFAULT *userService.DouyinUserRequest
+var InfoArgs_Req_DEFAULT *userservice.DouyinUserRequest
 
-func (p *InfoArgs) GetReq() *userService.DouyinUserRequest {
+func (p *InfoArgs) GetReq() *userservice.DouyinUserRequest {
 	if !p.IsSetReq() {
 		return InfoArgs_Req_DEFAULT
 	}
@@ -422,14 +422,14 @@ func (p *InfoArgs) IsSetReq() bool {
 }
 
 type InfoResult struct {
-	Success *userService.DouyinUserResponse
+	Success *userservice.DouyinUserResponse
 }
 
-var InfoResult_Success_DEFAULT *userService.DouyinUserResponse
+var InfoResult_Success_DEFAULT *userservice.DouyinUserResponse
 
 func (p *InfoResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(userService.DouyinUserResponse)
+		p.Success = new(userservice.DouyinUserResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -456,7 +456,7 @@ func (p *InfoResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *InfoResult) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinUserResponse)
+	msg := new(userservice.DouyinUserResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -464,7 +464,7 @@ func (p *InfoResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *InfoResult) GetSuccess() *userService.DouyinUserResponse {
+func (p *InfoResult) GetSuccess() *userservice.DouyinUserResponse {
 	if !p.IsSetSuccess() {
 		return InfoResult_Success_DEFAULT
 	}
@@ -472,7 +472,7 @@ func (p *InfoResult) GetSuccess() *userService.DouyinUserResponse {
 }
 
 func (p *InfoResult) SetSuccess(x interface{}) {
-	p.Success = x.(*userService.DouyinUserResponse)
+	p.Success = x.(*userservice.DouyinUserResponse)
 }
 
 func (p *InfoResult) IsSetSuccess() bool {
@@ -483,11 +483,11 @@ func actionHandler(ctx context.Context, handler interface{}, arg, result interfa
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(userService.DouyinRelationActionRequest)
+		req := new(userservice.DouyinRelationActionRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(userService.UserService).Action(ctx, req)
+		resp, err := handler.(userservice.UserService).Action(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -495,7 +495,7 @@ func actionHandler(ctx context.Context, handler interface{}, arg, result interfa
 			return err
 		}
 	case *ActionArgs:
-		success, err := handler.(userService.UserService).Action(ctx, s.Req)
+		success, err := handler.(userservice.UserService).Action(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -513,12 +513,12 @@ func newActionResult() interface{} {
 }
 
 type ActionArgs struct {
-	Req *userService.DouyinRelationActionRequest
+	Req *userservice.DouyinRelationActionRequest
 }
 
 func (p *ActionArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(userService.DouyinRelationActionRequest)
+		p.Req = new(userservice.DouyinRelationActionRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -545,7 +545,7 @@ func (p *ActionArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *ActionArgs) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinRelationActionRequest)
+	msg := new(userservice.DouyinRelationActionRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -553,9 +553,9 @@ func (p *ActionArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var ActionArgs_Req_DEFAULT *userService.DouyinRelationActionRequest
+var ActionArgs_Req_DEFAULT *userservice.DouyinRelationActionRequest
 
-func (p *ActionArgs) GetReq() *userService.DouyinRelationActionRequest {
+func (p *ActionArgs) GetReq() *userservice.DouyinRelationActionRequest {
 	if !p.IsSetReq() {
 		return ActionArgs_Req_DEFAULT
 	}
@@ -567,14 +567,14 @@ func (p *ActionArgs) IsSetReq() bool {
 }
 
 type ActionResult struct {
-	Success *userService.DouyinRelationActionResponse
+	Success *userservice.DouyinRelationActionResponse
 }
 
-var ActionResult_Success_DEFAULT *userService.DouyinRelationActionResponse
+var ActionResult_Success_DEFAULT *userservice.DouyinRelationActionResponse
 
 func (p *ActionResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(userService.DouyinRelationActionResponse)
+		p.Success = new(userservice.DouyinRelationActionResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -601,7 +601,7 @@ func (p *ActionResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *ActionResult) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinRelationActionResponse)
+	msg := new(userservice.DouyinRelationActionResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -609,7 +609,7 @@ func (p *ActionResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *ActionResult) GetSuccess() *userService.DouyinRelationActionResponse {
+func (p *ActionResult) GetSuccess() *userservice.DouyinRelationActionResponse {
 	if !p.IsSetSuccess() {
 		return ActionResult_Success_DEFAULT
 	}
@@ -617,7 +617,7 @@ func (p *ActionResult) GetSuccess() *userService.DouyinRelationActionResponse {
 }
 
 func (p *ActionResult) SetSuccess(x interface{}) {
-	p.Success = x.(*userService.DouyinRelationActionResponse)
+	p.Success = x.(*userservice.DouyinRelationActionResponse)
 }
 
 func (p *ActionResult) IsSetSuccess() bool {
@@ -628,11 +628,11 @@ func followListHandler(ctx context.Context, handler interface{}, arg, result int
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(userService.DouyinRelationFollowListRequest)
+		req := new(userservice.DouyinRelationFollowListRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(userService.UserService).FollowList(ctx, req)
+		resp, err := handler.(userservice.UserService).FollowList(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -640,7 +640,7 @@ func followListHandler(ctx context.Context, handler interface{}, arg, result int
 			return err
 		}
 	case *FollowListArgs:
-		success, err := handler.(userService.UserService).FollowList(ctx, s.Req)
+		success, err := handler.(userservice.UserService).FollowList(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -658,12 +658,12 @@ func newFollowListResult() interface{} {
 }
 
 type FollowListArgs struct {
-	Req *userService.DouyinRelationFollowListRequest
+	Req *userservice.DouyinRelationFollowListRequest
 }
 
 func (p *FollowListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(userService.DouyinRelationFollowListRequest)
+		p.Req = new(userservice.DouyinRelationFollowListRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -690,7 +690,7 @@ func (p *FollowListArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FollowListArgs) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinRelationFollowListRequest)
+	msg := new(userservice.DouyinRelationFollowListRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -698,9 +698,9 @@ func (p *FollowListArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var FollowListArgs_Req_DEFAULT *userService.DouyinRelationFollowListRequest
+var FollowListArgs_Req_DEFAULT *userservice.DouyinRelationFollowListRequest
 
-func (p *FollowListArgs) GetReq() *userService.DouyinRelationFollowListRequest {
+func (p *FollowListArgs) GetReq() *userservice.DouyinRelationFollowListRequest {
 	if !p.IsSetReq() {
 		return FollowListArgs_Req_DEFAULT
 	}
@@ -712,14 +712,14 @@ func (p *FollowListArgs) IsSetReq() bool {
 }
 
 type FollowListResult struct {
-	Success *userService.DouyinRelationFollowListResponse
+	Success *userservice.DouyinRelationFollowListResponse
 }
 
-var FollowListResult_Success_DEFAULT *userService.DouyinRelationFollowListResponse
+var FollowListResult_Success_DEFAULT *userservice.DouyinRelationFollowListResponse
 
 func (p *FollowListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(userService.DouyinRelationFollowListResponse)
+		p.Success = new(userservice.DouyinRelationFollowListResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -746,7 +746,7 @@ func (p *FollowListResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FollowListResult) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinRelationFollowListResponse)
+	msg := new(userservice.DouyinRelationFollowListResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -754,7 +754,7 @@ func (p *FollowListResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *FollowListResult) GetSuccess() *userService.DouyinRelationFollowListResponse {
+func (p *FollowListResult) GetSuccess() *userservice.DouyinRelationFollowListResponse {
 	if !p.IsSetSuccess() {
 		return FollowListResult_Success_DEFAULT
 	}
@@ -762,7 +762,7 @@ func (p *FollowListResult) GetSuccess() *userService.DouyinRelationFollowListRes
 }
 
 func (p *FollowListResult) SetSuccess(x interface{}) {
-	p.Success = x.(*userService.DouyinRelationFollowListResponse)
+	p.Success = x.(*userservice.DouyinRelationFollowListResponse)
 }
 
 func (p *FollowListResult) IsSetSuccess() bool {
@@ -773,11 +773,11 @@ func followerListHandler(ctx context.Context, handler interface{}, arg, result i
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(userService.DouyinRelationFollowerListRequest)
+		req := new(userservice.DouyinRelationFollowerListRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(userService.UserService).FollowerList(ctx, req)
+		resp, err := handler.(userservice.UserService).FollowerList(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -785,7 +785,7 @@ func followerListHandler(ctx context.Context, handler interface{}, arg, result i
 			return err
 		}
 	case *FollowerListArgs:
-		success, err := handler.(userService.UserService).FollowerList(ctx, s.Req)
+		success, err := handler.(userservice.UserService).FollowerList(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -803,12 +803,12 @@ func newFollowerListResult() interface{} {
 }
 
 type FollowerListArgs struct {
-	Req *userService.DouyinRelationFollowerListRequest
+	Req *userservice.DouyinRelationFollowerListRequest
 }
 
 func (p *FollowerListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(userService.DouyinRelationFollowerListRequest)
+		p.Req = new(userservice.DouyinRelationFollowerListRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -835,7 +835,7 @@ func (p *FollowerListArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FollowerListArgs) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinRelationFollowerListRequest)
+	msg := new(userservice.DouyinRelationFollowerListRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -843,9 +843,9 @@ func (p *FollowerListArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var FollowerListArgs_Req_DEFAULT *userService.DouyinRelationFollowerListRequest
+var FollowerListArgs_Req_DEFAULT *userservice.DouyinRelationFollowerListRequest
 
-func (p *FollowerListArgs) GetReq() *userService.DouyinRelationFollowerListRequest {
+func (p *FollowerListArgs) GetReq() *userservice.DouyinRelationFollowerListRequest {
 	if !p.IsSetReq() {
 		return FollowerListArgs_Req_DEFAULT
 	}
@@ -857,14 +857,14 @@ func (p *FollowerListArgs) IsSetReq() bool {
 }
 
 type FollowerListResult struct {
-	Success *userService.DouyinRelationFollowerListResponse
+	Success *userservice.DouyinRelationFollowerListResponse
 }
 
-var FollowerListResult_Success_DEFAULT *userService.DouyinRelationFollowerListResponse
+var FollowerListResult_Success_DEFAULT *userservice.DouyinRelationFollowerListResponse
 
 func (p *FollowerListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(userService.DouyinRelationFollowerListResponse)
+		p.Success = new(userservice.DouyinRelationFollowerListResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -891,7 +891,7 @@ func (p *FollowerListResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FollowerListResult) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinRelationFollowerListResponse)
+	msg := new(userservice.DouyinRelationFollowerListResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -899,7 +899,7 @@ func (p *FollowerListResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *FollowerListResult) GetSuccess() *userService.DouyinRelationFollowerListResponse {
+func (p *FollowerListResult) GetSuccess() *userservice.DouyinRelationFollowerListResponse {
 	if !p.IsSetSuccess() {
 		return FollowerListResult_Success_DEFAULT
 	}
@@ -907,7 +907,7 @@ func (p *FollowerListResult) GetSuccess() *userService.DouyinRelationFollowerLis
 }
 
 func (p *FollowerListResult) SetSuccess(x interface{}) {
-	p.Success = x.(*userService.DouyinRelationFollowerListResponse)
+	p.Success = x.(*userservice.DouyinRelationFollowerListResponse)
 }
 
 func (p *FollowerListResult) IsSetSuccess() bool {
@@ -918,11 +918,11 @@ func friendListHandler(ctx context.Context, handler interface{}, arg, result int
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(userService.DouyinRelationFriendListRequest)
+		req := new(userservice.DouyinRelationFriendListRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
-		resp, err := handler.(userService.UserService).FriendList(ctx, req)
+		resp, err := handler.(userservice.UserService).FriendList(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -930,7 +930,7 @@ func friendListHandler(ctx context.Context, handler interface{}, arg, result int
 			return err
 		}
 	case *FriendListArgs:
-		success, err := handler.(userService.UserService).FriendList(ctx, s.Req)
+		success, err := handler.(userservice.UserService).FriendList(ctx, s.Req)
 		if err != nil {
 			return err
 		}
@@ -948,12 +948,12 @@ func newFriendListResult() interface{} {
 }
 
 type FriendListArgs struct {
-	Req *userService.DouyinRelationFriendListRequest
+	Req *userservice.DouyinRelationFriendListRequest
 }
 
 func (p *FriendListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(userService.DouyinRelationFriendListRequest)
+		p.Req = new(userservice.DouyinRelationFriendListRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -980,7 +980,7 @@ func (p *FriendListArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FriendListArgs) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinRelationFriendListRequest)
+	msg := new(userservice.DouyinRelationFriendListRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -988,9 +988,9 @@ func (p *FriendListArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var FriendListArgs_Req_DEFAULT *userService.DouyinRelationFriendListRequest
+var FriendListArgs_Req_DEFAULT *userservice.DouyinRelationFriendListRequest
 
-func (p *FriendListArgs) GetReq() *userService.DouyinRelationFriendListRequest {
+func (p *FriendListArgs) GetReq() *userservice.DouyinRelationFriendListRequest {
 	if !p.IsSetReq() {
 		return FriendListArgs_Req_DEFAULT
 	}
@@ -1002,14 +1002,14 @@ func (p *FriendListArgs) IsSetReq() bool {
 }
 
 type FriendListResult struct {
-	Success *userService.DouyinRelationFriendListResponse
+	Success *userservice.DouyinRelationFriendListResponse
 }
 
-var FriendListResult_Success_DEFAULT *userService.DouyinRelationFriendListResponse
+var FriendListResult_Success_DEFAULT *userservice.DouyinRelationFriendListResponse
 
 func (p *FriendListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(userService.DouyinRelationFriendListResponse)
+		p.Success = new(userservice.DouyinRelationFriendListResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -1036,7 +1036,7 @@ func (p *FriendListResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *FriendListResult) Unmarshal(in []byte) error {
-	msg := new(userService.DouyinRelationFriendListResponse)
+	msg := new(userservice.DouyinRelationFriendListResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -1044,7 +1044,7 @@ func (p *FriendListResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *FriendListResult) GetSuccess() *userService.DouyinRelationFriendListResponse {
+func (p *FriendListResult) GetSuccess() *userservice.DouyinRelationFriendListResponse {
 	if !p.IsSetSuccess() {
 		return FriendListResult_Success_DEFAULT
 	}
@@ -1052,7 +1052,7 @@ func (p *FriendListResult) GetSuccess() *userService.DouyinRelationFriendListRes
 }
 
 func (p *FriendListResult) SetSuccess(x interface{}) {
-	p.Success = x.(*userService.DouyinRelationFriendListResponse)
+	p.Success = x.(*userservice.DouyinRelationFriendListResponse)
 }
 
 func (p *FriendListResult) IsSetSuccess() bool {
@@ -1069,7 +1069,7 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
-func (p *kClient) Login(ctx context.Context, Req *userService.DouyinUserLoginRequest) (r *userService.DouyinUserLoginResponse, err error) {
+func (p *kClient) Login(ctx context.Context, Req *userservice.DouyinUserLoginRequest) (r *userservice.DouyinUserLoginResponse, err error) {
 	var _args LoginArgs
 	_args.Req = Req
 	var _result LoginResult
@@ -1079,7 +1079,7 @@ func (p *kClient) Login(ctx context.Context, Req *userService.DouyinUserLoginReq
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) Register(ctx context.Context, Req *userService.DouyinUserRegisterRequest) (r *userService.DouyinUserRegisterResponse, err error) {
+func (p *kClient) Register(ctx context.Context, Req *userservice.DouyinUserRegisterRequest) (r *userservice.DouyinUserRegisterResponse, err error) {
 	var _args RegisterArgs
 	_args.Req = Req
 	var _result RegisterResult
@@ -1089,7 +1089,7 @@ func (p *kClient) Register(ctx context.Context, Req *userService.DouyinUserRegis
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) Info(ctx context.Context, Req *userService.DouyinUserRequest) (r *userService.DouyinUserResponse, err error) {
+func (p *kClient) Info(ctx context.Context, Req *userservice.DouyinUserRequest) (r *userservice.DouyinUserResponse, err error) {
 	var _args InfoArgs
 	_args.Req = Req
 	var _result InfoResult
@@ -1099,7 +1099,7 @@ func (p *kClient) Info(ctx context.Context, Req *userService.DouyinUserRequest) 
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) Action(ctx context.Context, Req *userService.DouyinRelationActionRequest) (r *userService.DouyinRelationActionResponse, err error) {
+func (p *kClient) Action(ctx context.Context, Req *userservice.DouyinRelationActionRequest) (r *userservice.DouyinRelationActionResponse, err error) {
 	var _args ActionArgs
 	_args.Req = Req
 	var _result ActionResult
@@ -1109,7 +1109,7 @@ func (p *kClient) Action(ctx context.Context, Req *userService.DouyinRelationAct
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) FollowList(ctx context.Context, Req *userService.DouyinRelationFollowListRequest) (r *userService.DouyinRelationFollowListResponse, err error) {
+func (p *kClient) FollowList(ctx context.Context, Req *userservice.DouyinRelationFollowListRequest) (r *userservice.DouyinRelationFollowListResponse, err error) {
 	var _args FollowListArgs
 	_args.Req = Req
 	var _result FollowListResult
@@ -1119,7 +1119,7 @@ func (p *kClient) FollowList(ctx context.Context, Req *userService.DouyinRelatio
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) FollowerList(ctx context.Context, Req *userService.DouyinRelationFollowerListRequest) (r *userService.DouyinRelationFollowerListResponse, err error) {
+func (p *kClient) FollowerList(ctx context.Context, Req *userservice.DouyinRelationFollowerListRequest) (r *userservice.DouyinRelationFollowerListResponse, err error) {
 	var _args FollowerListArgs
 	_args.Req = Req
 	var _result FollowerListResult
@@ -1129,7 +1129,7 @@ func (p *kClient) FollowerList(ctx context.Context, Req *userService.DouyinRelat
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) FriendList(ctx context.Context, Req *userService.DouyinRelationFriendListRequest) (r *userService.DouyinRelationFriendListResponse, err error) {
+func (p *kClient) FriendList(ctx context.Context, Req *userservice.DouyinRelationFriendListRequest) (r *userservice.DouyinRelationFriendListResponse, err error) {
 	var _args FriendListArgs
 	_args.Req = Req
 	var _result FriendListResult

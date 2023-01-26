@@ -10,7 +10,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
-	"mini_tiktok/kitex_gen/userService"
+	"mini_tiktok/kitex_gen/userservice"
 	"strconv"
 )
 
@@ -41,7 +41,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userService.DouyinUserRegisterRequest{
+	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userservice.DouyinUserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -70,7 +70,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	hlog.Info("start call login rpc api")
-	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userService.DouyinUserLoginRequest{
+	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userservice.DouyinUserLoginRequest{
 		Username: req.Username,
 		Password: req.Password,
 	})
@@ -105,7 +105,7 @@ func User(ctx context.Context, c *app.RequestContext) {
 	}
 
 	userId, _ := strconv.Atoi(req.UserID)
-	info, err := rpc.UserRpcClient.Info(context.Background(), &userService.DouyinUserRequest{UserId: int64(userId), Token: req.Token})
+	info, err := rpc.UserRpcClient.Info(context.Background(), &userservice.DouyinUserRequest{UserId: int64(userId), Token: req.Token})
 	if err != nil {
 		c.JSON(consts.StatusOK, utils.H{
 			"code":    0,
