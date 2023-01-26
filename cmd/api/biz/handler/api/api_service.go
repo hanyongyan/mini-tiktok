@@ -10,7 +10,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
-	"mini_tiktok/kitex_gen/userservice"
+	userservice "mini_tiktok/kitex_gen/userservice"
+
 	"strconv"
 )
 
@@ -80,17 +81,15 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
 		return
 	}
-	//resp := &api.UserLoginResp{
-	//	StatusCode:    int64(loginResponse.StatusCode),
-	//	StatusMessage: loginResponse.StatusMsg,
-	//	UserID:        loginResponse.UserId,
-	//	Token:         loginResponse.Token,
-	//}
+	resp := &api.UserLoginResp{
+		StatusCode:    int64(loginResponse.StatusCode),
+		StatusMessage: loginResponse.StatusMsg,
+		UserID:        loginResponse.UserId,
+		Token:         loginResponse.Token,
+	}
 	hlog.Infof("get resp: %+v", loginResponse)
 
-	c.JSON(consts.StatusOK, utils.H{
-		"msg": "done",
-	})
+	c.JSON(consts.StatusOK, resp)
 }
 
 // User .

@@ -10,7 +10,7 @@ type UserServiceImpl struct{}
 
 // Login implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Login(ctx context.Context, req *userservice.DouyinUserLoginRequest) (resp *userservice.DouyinUserLoginResponse, err error) {
-	// TODO: Your code here...
+	resp = &userservice.DouyinUserLoginResponse{StatusCode: 0, StatusMsg: "ok"}
 	return
 }
 
