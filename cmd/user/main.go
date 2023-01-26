@@ -1,10 +1,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	"github.com/cloudwego/kitex/pkg/utils"
 	"github.com/cloudwego/kitex/server"
 	kitexlogrus "github.com/kitex-contrib/obs-opentelemetry/logging/logrus"
 	"github.com/kitex-contrib/obs-opentelemetry/provider"
@@ -19,7 +20,6 @@ import (
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
-	"net"
 )
 
 func Init() {
@@ -32,12 +32,11 @@ func Init() {
 
 func main() {
 
-	p := provider.NewOpenTelemetryProvider(
+	provider.NewOpenTelemetryProvider(
 		provider.WithServiceName(consts.UserServiceName),
 		provider.WithExportEndpoint(consts.ExportEndpoint),
 		provider.WithInsecure(),
 	)
-	defer p.Shutdown(context.Background())
 
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig(consts.NacosAddr, consts.NacosPort),
@@ -63,14 +62,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	addr, err := net.ResolveTCPAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.UserServiceAddr))
-	if err != nil {
-		panic(err)
-	}
+
 	Init()
 	svr := userservice.NewServer(new(UserServiceImpl),
-		server.WithServiceAddr(addr),
-		//server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
+		server.WithServiceAddr(utils.NewNetAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.UserServiceAddr))),
+		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
 		server.WithMiddleware(mw.CommonMiddleware),
 		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.UserServiceName}),

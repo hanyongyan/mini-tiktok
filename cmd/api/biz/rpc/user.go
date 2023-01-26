@@ -49,7 +49,6 @@ func initUser() {
 	c, err := userservice.NewClient(
 		consts.UserServiceName,
 		client.WithResolver(resolver.NewNacosResolver(r)),
-		//client.WithMuxConnection(1),
 		client.WithMiddleware(mw.CommonMiddleware),
 		client.WithInstanceMW(mw.ClientMiddleware),
 		client.WithSuite(tracing.NewClientSuite()),
