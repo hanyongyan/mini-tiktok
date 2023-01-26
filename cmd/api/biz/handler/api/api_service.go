@@ -81,6 +81,12 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
 		return
 	}
+	if loginResponse == nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"status": "nil",
+		})
+		return
+	}
 	resp := &api.UserLoginResp{
 		StatusCode:    int64(loginResponse.StatusCode),
 		StatusMessage: loginResponse.StatusMsg,
