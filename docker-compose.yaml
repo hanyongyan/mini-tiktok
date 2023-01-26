@@ -14,10 +14,15 @@ services:
       - MYSQL_RANDOM_ROOT_PASSWORD="yes"
 
   # Nacos
-  Nacos:
-    image: 'nacos/nacos-server:latest'
+  nacos:
+    image: "nacos/nacos-server:v2.1.2-slim"
     ports:
       - "8848:8848"
+    environment:
+      - MODE=standalone
+      - JVM_XMS=512m
+      - JVM_XMX=512m
+      - JVM_XMN=256m
 
   # Collector
   otel-collector:
