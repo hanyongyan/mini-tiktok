@@ -235,11 +235,12 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	// 前面有中间件检测当前用户是否在登录
 	var err error
 	var req *userservice.DouyinRelationActionRequest
-	// 请求参数进行绑定
-	// 将 string 转为 int32 但是此函数返回的是 int64
-	actionTypeInt64, _ := strconv.ParseInt(c.PostForm("action_type"), 10, 32)
-	req.ActionType = int32(actionTypeInt64)
-	req.Token = c.PostForm("token")
+	// 将参数进行绑定
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
 
 	// 调用 userService 的函数
 	action, err := rpc.UserRpcClient.Action(ctx, req)
@@ -262,6 +263,7 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 // RelationFollowList .
 // @router /douyin/relation/follow/list [GET]
 func RelationFollowList(ctx context.Context, c *app.RequestContext) {
+	// 关注列表
 	var err error
 	var req api.RelationFollowListReq
 	err = c.BindAndValidate(&req)
