@@ -15,14 +15,18 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"mini_tiktok/cmd/video/rpc"
 	"mini_tiktok/kitex_gen/videoservice/videoservice"
+	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
+	"mini_tiktok/pkg/task"
 	"net"
 )
 
 func Init() {
+	task.Init()
+	cache.Init()
 	config.Init()
 	rpc.Init()
 	dal.Init()

@@ -2,7 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	videoservice "mini_tiktok/kitex_gen/videoservice"
+	"mini_tiktok/pkg/cache"
+	"mini_tiktok/pkg/consts"
+	jwtutil "mini_tiktok/pkg/utils"
+	"strconv"
+	"time"
 )
 
 // VideoServiceImpl implements the last service interface defined in the IDL.
@@ -26,12 +32,24 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *videoservice.Do
 	return
 }
 
+// FavoriteAction 2023-1-27 @Auth by 李卓轩 version 1.0
+// 赞操作
 // FavoriteAction implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice.DouyinFavoriteActionRequest) (resp *videoservice.DouyinFavoriteActionResponse, err error) {
-	// TODO: Your code here...
+	// 通过 token 解析出当前用户
+	claims, flag := jwtutil.CheckToken(req.Token)
+	// 说明 token 已经过期
+	if !flag {
+		return nil, errors.New("token is expired")
+	}
+
+	// 将点赞存入redis
+	cache.RedisCache.Set(ctx, consts.FavoriteActionPrefix+strconv.FormatInt(claims.UserId, 10), req.VideoId, time.Second*60*30)
 	return
 }
 
+// FavoriteList 2023-1-27 @Auth by 李卓轩 version 1.0
+// 喜欢列表
 // FavoriteList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.DouyinFavoriteListRequest) (resp *videoservice.DouyinFavoriteListResponse, err error) {
 	// TODO: Your code here...
