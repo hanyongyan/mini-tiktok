@@ -11,7 +11,6 @@ import (
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
 	userservice "mini_tiktok/kitex_gen/userservice"
-
 	"strconv"
 )
 
@@ -232,16 +231,31 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 // RelationAction .
 // @router /douyin/relation/action [POST]
 func RelationAction(ctx context.Context, c *app.RequestContext) {
+
+	// 前面有中间件检测当前用户是否在登录
 	var err error
-	var req api.RelationActionReq
-	err = c.BindAndValidate(&req)
+	var req *userservice.DouyinRelationActionRequest
+	// 请求参数进行绑定
+	// 将 string 转为 int32 但是此函数返回的是 int64
+	actionTypeInt64, _ := strconv.ParseInt(c.PostForm("action_type"), 10, 32)
+	req.ActionType = int32(actionTypeInt64)
+	req.Token = c.PostForm("token")
+
+	// 调用 userService 的函数
+	action, err := rpc.UserRpcClient.Action(ctx, req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusOK, utils.H{"code": 1, "message": err.Error()})
+		return
+	}
+	if action == nil {
+		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
 		return
 	}
 
-	resp := new(api.RelationActionResp)
-
+	resp := &api.RelationActionResp{
+		StatusCode:    int64(action.StatusCode),
+		StatusMessage: action.StatusMsg,
+	}
 	c.JSON(consts.StatusOK, resp)
 }
 

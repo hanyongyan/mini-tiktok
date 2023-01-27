@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"mini_tiktok/cmd/user/utils"
 	userservice "mini_tiktok/kitex_gen/userservice"
@@ -104,7 +105,44 @@ func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserR
 
 // Action implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRelationActionRequest) (resp *userservice.DouyinRelationActionResponse, err error) {
-	// TODO: Your code here...
+	// 关注操作
+	q := query.Q.TFollow
+	// 通过 token 解析出当前用户
+	claims, flag := jwtutil.CheckToken(req.Token)
+	// 说明 token 已经过期
+	if !flag {
+		return nil, errors.New("token is expired")
+	}
+
+	actionType := req.ActionType
+	// actionType == 1 关注操作，actionType == 2 取消关注
+	if actionType == 1 {
+		// 创建出新增的用户信息
+		follow := model.TFollow{
+			UserID:     claims.UserId,
+			FollowerID: req.ToUserId,
+		}
+		// 新增关注
+		err = q.WithContext(ctx).Create(&follow)
+		if err != nil {
+			return
+		}
+	} else if actionType == 2 {
+		follow := model.TFollow{
+			UserID:     claims.UserId,
+			FollowerID: req.ToUserId,
+		}
+		// 不能够直接使用 delete 函数进行删除数据，因为 delete 是使用 id 来进行删除操作的
+		//_, err := q.WithContext(ctx).Delete(&follow)
+		_, err := q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).
+			Where(q.FollowerID.Eq(follow.FollowerID)).Delete()
+		// 删除失败
+		if err != nil {
+			return
+		}
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "关注成功！"
 	return
 }
 
