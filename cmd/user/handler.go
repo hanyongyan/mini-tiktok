@@ -134,7 +134,7 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 		}
 		// 不能够直接使用 delete 函数进行删除数据，因为 delete 是使用 id 来进行删除操作的
 		//_, err := q.WithContext(ctx).Delete(&follow)
-		_, err := q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).
+		_, err = q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).
 			Where(q.FollowerID.Eq(follow.FollowerID)).Delete()
 		// 删除失败
 		if err != nil {
