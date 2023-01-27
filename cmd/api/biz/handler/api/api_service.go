@@ -271,8 +271,18 @@ func RelationFollowList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
-	resp := new(api.RelationFollowListResp)
+	hlog.Info("start call login rpc api")
+	// 将 字符串 转为 int64
+	userId, _ := strconv.ParseInt(req.UserID, 10, 64)
+	resp, err := rpc.UserRpcClient.FollowList(ctx, &userservice.DouyinRelationFollowListRequest{
+		UserId: userId,
+		Token:  req.Token,
+	})
+	hlog.Info("call login rpc api end")
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
+		return
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }

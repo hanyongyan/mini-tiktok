@@ -112,8 +112,10 @@ func _followMw() []app.HandlerFunc {
 }
 
 func _relationfollowlistMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	// 关注列表，用户登录验证
+	return []app.HandlerFunc{
+		mw.JwtMiddleware(),
+	}
 }
 
 func _followerMw() []app.HandlerFunc {

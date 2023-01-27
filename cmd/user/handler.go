@@ -148,7 +148,41 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 
 // FollowList implements the UserServiceImpl interface.
 func (s *UserServiceImpl) FollowList(ctx context.Context, req *userservice.DouyinRelationFollowListRequest) (resp *userservice.DouyinRelationFollowListResponse, err error) {
-	// TODO: Your code here...
+	// 关注列表
+	queryFollow := query.Q.TFollow
+	// 进行查询用户
+	queryUser := query.Q.TUser
+	// 返回的用户信息
+	//users := &[]model.TUser{}
+	// 只进行查询关注用户的 id
+	follows, err := queryFollow.WithContext(ctx).Select(queryFollow.FollowerID).Where(queryFollow.UserID.Eq(req.UserId)).Find()
+	if err != nil {
+		return
+	}
+	followerIds := make([]int64, len(follows))
+	// 将关注用户的 id 进行提取出来
+	for i, follow := range follows {
+		followerIds[i] = follow.FollowerID
+	}
+	// 使用 select 进行规范查询的数据，使得不查询密码
+	// 根据关注用户 id 查询到所有的 关注用户信息
+	users, err := queryUser.WithContext(ctx).Select(queryUser.ID, queryUser.Name,
+		queryUser.FollowCount, queryUser.FollowerCount).Where(queryUser.ID.In(followerIds...)).Find()
+	if err != nil {
+		return
+	}
+	// 将所有的关注用户信息进行添加到 返回值中
+	var user userservice.User
+	for _, tUser := range users {
+		user.Id = tUser.ID
+		user.Name = tUser.Name
+		user.FollowerCount = tUser.FollowerCount
+		user.FollowCount = tUser.FollowCount
+		user.IsFollow = true
+		resp.UserList = append(resp.UserList, &user)
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "the request succeeded"
 	return
 }
 
