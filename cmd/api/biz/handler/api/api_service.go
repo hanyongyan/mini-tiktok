@@ -11,6 +11,7 @@ import (
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
 	userservice "mini_tiktok/kitex_gen/userservice"
+	"time"
 
 	"strconv"
 )
@@ -27,6 +28,25 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(api.FeedResp)
+	resp.StatusCode = 0
+	resp.NextTime = time.Now().Unix()
+	resp.VideoList = []*api.Video{
+		{
+			ID: 1,
+			Author: &api.User{
+				ID:            1,
+				Name:          "Woqunimade",
+				FollowCount:   0,
+				FollowerCount: 0,
+				IsFollow:      false,
+			},
+			PlayURL:       "https://www.w3schools.com/html/movie.mp4",
+			CoverURL:      "https://cdn.pixabay.com/photo/2016/03/27/18/10/bear-1283347_1280.jpg",
+			FavoriteCount: 0,
+			CommentCount:  0,
+			IsFavorite:    false,
+		},
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
@@ -64,16 +84,12 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 // @router /douyin/user/login [POST]
 func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
-	var req api.UserLoginReq
-	err = c.BindAndValidate(&req)
-	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
-		return
-	}
+	username := c.Query("username")
+	password := c.Query("password")
 	hlog.Info("start call login rpc api")
 	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userservice.DouyinUserLoginRequest{
-		Username: req.Username,
-		Password: req.Password,
+		Username: username,
+		Password: password,
 	})
 	hlog.Info("call login rpc api end")
 	if err != nil {
