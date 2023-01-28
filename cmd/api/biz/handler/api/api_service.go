@@ -248,22 +248,39 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 // RelationAction .
 // @router /douyin/relation/action [POST]
 func RelationAction(ctx context.Context, c *app.RequestContext) {
+
+	// 前面有中间件检测当前用户是否在登录
 	var err error
-	var req api.RelationActionReq
+	var req *userservice.DouyinRelationActionRequest
+	// 将参数进行绑定
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp := new(api.RelationActionResp)
+	// 调用 userService 的函数
+	action, err := rpc.UserRpcClient.Action(ctx, req)
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{"code": 1, "message": err.Error()})
+		return
+	}
+	if action == nil {
+		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
+		return
+	}
 
+	resp := &api.RelationActionResp{
+		StatusCode:    int64(action.StatusCode),
+		StatusMessage: action.StatusMsg,
+	}
 	c.JSON(consts.StatusOK, resp)
 }
 
 // RelationFollowList .
 // @router /douyin/relation/follow/list [GET]
 func RelationFollowList(ctx context.Context, c *app.RequestContext) {
+	// 关注列表
 	var err error
 	var req api.RelationFollowListReq
 	err = c.BindAndValidate(&req)
@@ -271,8 +288,18 @@ func RelationFollowList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
-	resp := new(api.RelationFollowListResp)
+	hlog.Info("start call login rpc api")
+	// 将 字符串 转为 int64
+	userId, _ := strconv.ParseInt(req.UserID, 10, 64)
+	resp, err := rpc.UserRpcClient.FollowList(ctx, &userservice.DouyinRelationFollowListRequest{
+		UserId: userId,
+		Token:  req.Token,
+	})
+	hlog.Info("call login rpc api end")
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
+		return
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
