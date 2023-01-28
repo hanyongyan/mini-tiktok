@@ -53,7 +53,7 @@ func main() {
 	r := nacos.NewNacosRegistry(nacoscli)
 
 	tracer, cfg := tracing.NewServerTracer()
-	addr := ":8080"
+	addr := "0.0.0.0:8080"
 	h := server.New(
 		server.WithHostPorts(addr),
 		server.WithHandleMethodNotAllowed(true),
