@@ -6,7 +6,6 @@ package query
 
 import (
 	"context"
-	"mini_tiktok/pkg/dal/model"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -17,6 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
+	"mini_tiktok/pkg/dal/model"
 )
 
 func newTUser(db *gorm.DB, opts ...gen.DOOption) tUser {

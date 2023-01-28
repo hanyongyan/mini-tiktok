@@ -20,6 +20,7 @@ var (
 	TComment  *tComment
 	TFavorite *tFavorite
 	TFollow   *tFollow
+	TFriend   *tFriend
 	TUser     *tUser
 	TVideo    *tVideo
 )
@@ -29,6 +30,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	TComment = &Q.TComment
 	TFavorite = &Q.TFavorite
 	TFollow = &Q.TFollow
+	TFriend = &Q.TFriend
 	TUser = &Q.TUser
 	TVideo = &Q.TVideo
 }
@@ -39,6 +41,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		TComment:  newTComment(db, opts...),
 		TFavorite: newTFavorite(db, opts...),
 		TFollow:   newTFollow(db, opts...),
+		TFriend:   newTFriend(db, opts...),
 		TUser:     newTUser(db, opts...),
 		TVideo:    newTVideo(db, opts...),
 	}
@@ -50,6 +53,7 @@ type Query struct {
 	TComment  tComment
 	TFavorite tFavorite
 	TFollow   tFollow
+	TFriend   tFriend
 	TUser     tUser
 	TVideo    tVideo
 }
@@ -62,6 +66,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		TComment:  q.TComment.clone(db),
 		TFavorite: q.TFavorite.clone(db),
 		TFollow:   q.TFollow.clone(db),
+		TFriend:   q.TFriend.clone(db),
 		TUser:     q.TUser.clone(db),
 		TVideo:    q.TVideo.clone(db),
 	}
@@ -81,6 +86,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		TComment:  q.TComment.replaceDB(db),
 		TFavorite: q.TFavorite.replaceDB(db),
 		TFollow:   q.TFollow.replaceDB(db),
+		TFriend:   q.TFriend.replaceDB(db),
 		TUser:     q.TUser.replaceDB(db),
 		TVideo:    q.TVideo.replaceDB(db),
 	}
@@ -90,6 +96,7 @@ type queryCtx struct {
 	TComment  ITCommentDo
 	TFavorite ITFavoriteDo
 	TFollow   ITFollowDo
+	TFriend   ITFriendDo
 	TUser     ITUserDo
 	TVideo    ITVideoDo
 }
@@ -99,6 +106,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		TComment:  q.TComment.WithContext(ctx),
 		TFavorite: q.TFavorite.WithContext(ctx),
 		TFollow:   q.TFollow.WithContext(ctx),
+		TFriend:   q.TFriend.WithContext(ctx),
 		TUser:     q.TUser.WithContext(ctx),
 		TVideo:    q.TVideo.WithContext(ctx),
 	}
