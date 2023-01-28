@@ -231,32 +231,39 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 // RelationAction .
 // @router /douyin/relation/action [POST]
 func RelationAction(ctx context.Context, c *app.RequestContext) {
-
-	// 前面有中间件检测当前用户是否在登录
+	// 关注操作
 	var err error
-	var req *userservice.DouyinRelationActionRequest
-	// 将参数进行绑定
+	var req api.RelationActionReq
+	var resp api.RelationActionResp
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		resp.StatusMessage = err.Error()
+		resp.StatusCode = 1
 		return
 	}
+	toUserId, toUserIdErr := strconv.ParseInt(req.ToUserID, 10, 64)
+	actionType, actionTypeErr := strconv.ParseInt(req.ActionType, 10, 32)
+	if toUserIdErr != nil || actionTypeErr != nil {
+		resp.StatusCode = 0
+		resp.StatusMessage = "传入的参数错误"
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	// userService 完成 关注操作
+	result, err := rpc.UserRpcClient.Action(ctx, &userservice.DouyinRelationActionRequest{
+		Token:      req.Token,
+		ToUserId:   toUserId,
+		ActionType: int32(actionType),
+	})
 
-	// 调用 userService 的函数
-	action, err := rpc.UserRpcClient.Action(ctx, req)
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{"code": 1, "message": err.Error()})
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
-	if action == nil {
-		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
-		return
-	}
-
-	resp := &api.RelationActionResp{
-		StatusCode:    int64(action.StatusCode),
-		StatusMessage: action.StatusMsg,
-	}
+	resp.StatusCode = 0
+	resp.StatusMessage = result.StatusMsg
 	c.JSON(consts.StatusOK, resp)
 }
 

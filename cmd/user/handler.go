@@ -9,6 +9,7 @@ import (
 	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
 	jwtutil "mini_tiktok/pkg/utils"
+	utils2 "mini_tiktok/pkg/utils"
 )
 
 // UserServiceImpl implements the last service interface defined in the IDL.
@@ -107,42 +108,57 @@ func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserR
 func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRelationActionRequest) (resp *userservice.DouyinRelationActionResponse, err error) {
 	// 关注操作
 	q := query.Q.TFollow
-	// 通过 token 解析出当前用户
-	claims, flag := jwtutil.CheckToken(req.Token)
-	// 说明 token 已经过期
-	if !flag {
-		return nil, errors.New("token is expired")
-	}
+	resp = &userservice.DouyinRelationActionResponse{}
 
-	actionType := req.ActionType
-	// actionType == 1 关注操作，actionType == 2 取消关注
-	if actionType == 1 {
-		// 创建出新增的用户信息
-		follow := model.TFollow{
-			UserID:     claims.UserId,
-			FollowerID: req.ToUserId,
-		}
-		// 新增关注
-		err = q.WithContext(ctx).Create(&follow)
-		if err != nil {
-			return
-		}
-	} else if actionType == 2 {
-		follow := model.TFollow{
-			UserID:     claims.UserId,
-			FollowerID: req.ToUserId,
-		}
-		// 不能够直接使用 delete 函数进行删除数据，因为 delete 是使用 id 来进行删除操作的
-		//_, err := q.WithContext(ctx).Delete(&follow)
-		_, err = q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).
-			Where(q.FollowerID.Eq(follow.FollowerID)).Delete()
-		// 删除失败
-		if err != nil {
-			return
-		}
+	claims, flag := utils2.CheckToken(req.Token)
+	// 解析 token 失败
+	if !flag {
+		err = errors.New("token is expired")
+		return
 	}
-	resp.StatusCode = 0
-	resp.StatusMsg = "关注成功！"
+	follow := &model.TFollow{
+		UserID:     claims.UserId,
+		FollowerID: req.ToUserId,
+	}
+	if req.ActionType == 1 {
+		// 关注操作
+		resultFollow, err := q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).First()
+		// 说明还没有关注过
+		if err != nil && err.Error() == "record not found" {
+			err = q.WithContext(ctx).Create(follow)
+			if err != nil {
+				return nil, err
+			}
+			// 进行到此步说明 添加关注成功
+			resp.StatusCode = 0
+			resp.StatusMsg = "关注成功"
+			return resp, nil
+		}
+		// 说明已经关注过
+		if resultFollow != nil {
+			err = errors.New("请勿重复关注！")
+			return nil, err
+		}
+
+	} else {
+		// 取消关注操作
+		// 先进行是否存在这样一种关注关系
+		_, err := q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).First()
+		// 查询不到用户
+		if err != nil && err.Error() == "record not found" {
+			err = errors.New("请勿重复取消关注")
+			return nil, err
+		}
+
+		// 进行删除数据库中的数据
+		_, err = q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).Delete()
+		if err != nil {
+			return nil, err
+		}
+		resp.StatusMsg = "取消关注成功"
+		resp.StatusCode = 0
+		return resp, nil
+	}
 	return
 }
 
