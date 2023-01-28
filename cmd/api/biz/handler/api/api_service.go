@@ -11,6 +11,7 @@ import (
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
 	userservice "mini_tiktok/kitex_gen/userservice"
+	"mini_tiktok/kitex_gen/videoservice"
 	"strconv"
 )
 
@@ -164,7 +165,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-// FavoriteAction .
+// FavoriteAction .点赞接口
 // @router /douyin/favorite/action [POST]
 func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	var err error
@@ -175,12 +176,30 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp := new(api.FavoriteActionResp)
+	videoId, _ := strconv.Atoi(req.VideoID)
+	actionType, _ := strconv.Atoi(req.ActionType)
+	r, err := rpc.VideoRpcClient.FavoriteAction(context.Background(), &videoservice.DouyinFavoriteActionRequest{
+		Token:      req.Token,
+		VideoId:    int64(videoId),
+		ActionType: int32(actionType),
+	})
+
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"code":    0,
+			"message": err.Error(),
+		})
+		return
+	}
+	resp := &api.FavoriteActionResp{
+		StatusCode:    0,
+		StatusMessage: r.StatusMsg,
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
 
-// FavoriteList .
+// FavoriteList
 // @router /douyin/favorite/list [GET]
 func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	var err error
@@ -190,10 +209,13 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
-	resp := new(api.FavoriteListResp)
-
-	c.JSON(consts.StatusOK, resp)
+	//rpc.VideoRpcClient.FavoriteAction(context.Background(), &videoservice.DouyinFavoriteActionRequest{
+	//	Token:      req.Token,
+	//	VideoId:    req,
+	//	ActionType: 0,
+	//})
+	//
+	//c.JSON(consts.StatusOK, resp)
 }
 
 // CommentAction .
