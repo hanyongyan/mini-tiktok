@@ -204,7 +204,43 @@ func (s *UserServiceImpl) FollowList(ctx context.Context, req *userservice.Douyi
 
 // FollowerList implements the UserServiceImpl interface.
 func (s *UserServiceImpl) FollowerList(ctx context.Context, req *userservice.DouyinRelationFollowerListRequest) (resp *userservice.DouyinRelationFollowerListResponse, err error) {
-	// TODO: Your code here...
+	resp = &userservice.DouyinRelationFollowerListResponse{}
+	// 用于查询粉丝的用户 id
+	queryFollow := query.Q.TFollow
+	// 根据粉丝的id查询出所有的粉丝
+	queryUser := query.Q.TUser
+	// 检索粉丝的id
+	followers, err := queryFollow.WithContext(ctx).Select(queryFollow.UserID).Where(queryFollow.FollowerID.Eq(req.UserId)).Find()
+	if err != nil {
+		return
+	}
+	// 用来绑定粉丝id
+	followersId := make([]int64, len(followers))
+	for i, follower := range followers {
+		followersId[i] = follower.UserID
+	}
+	//进行查询粉丝用户信息
+	t_users, err := queryUser.WithContext(ctx).Where(queryUser.ID.In(followersId...)).Find()
+	if err != nil {
+		return
+	}
+	for _, tUser := range t_users {
+		var user userservice.User
+		user.Id = tUser.ID
+		user.FollowCount = tUser.FollowCount
+		user.FollowerCount = tUser.FollowerCount
+		user.Name = tUser.Name
+		// 进行查询当前用户是否关注了此粉丝
+		_, err := queryFollow.WithContext(ctx).Where(queryFollow.UserID.Eq(req.UserId)).Where(queryFollow.FollowerID.Eq(user.Id)).First()
+		if err != nil && err.Error() == "record not found" {
+			user.IsFollow = false
+		} else {
+			user.IsFollow = true
+		}
+		resp.UserList = append(resp.UserList, &user)
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "查询粉丝成功"
 	return
 }
 
