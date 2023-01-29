@@ -13,3 +13,9 @@ mq:
 redis:
   host: localhost
   port: 6379
+
+ftp:
+  host: localhost
+  port: 21
+  username:
+  password:
