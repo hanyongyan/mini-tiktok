@@ -209,13 +209,25 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-	//rpc.VideoRpcClient.FavoriteAction(context.Background(), &videoservice.DouyinFavoriteActionRequest{
-	//	Token:      req.Token,
-	//	VideoId:    req,
-	//	ActionType: 0,
-	//})
-	//
-	//c.JSON(consts.StatusOK, resp)
+	userId, _ := strconv.Atoi(req.UserID)
+	r, err := rpc.VideoRpcClient.FavoriteList(context.Background(), &videoservice.DouyinFavoriteListRequest{
+		UserId: int64(userId),
+		Token:  req.Token,
+	})
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"code":    0,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	resp := &videoservice.DouyinFavoriteListResponse{
+		StatusCode: 0,
+		StatusMsg:  "查询成功",
+		VideoList:  r.VideoList,
+	}
+	c.JSON(consts.StatusOK, resp)
 }
 
 // CommentAction .
