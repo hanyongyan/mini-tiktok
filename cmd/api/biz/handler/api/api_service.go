@@ -4,6 +4,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -11,6 +12,8 @@ import (
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
 	userservice "mini_tiktok/kitex_gen/userservice"
+	"mini_tiktok/kitex_gen/videoservice"
+	utils2 "mini_tiktok/pkg/utils"
 	"time"
 
 	"strconv"
@@ -26,28 +29,27 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
-	resp := new(api.FeedResp)
-	resp.StatusCode = 0
-	resp.NextTime = time.Now().Unix()
-	resp.VideoList = []*api.Video{
-		{
-			ID: 1,
-			Author: &api.User{
-				ID:            1,
-				Name:          "Woqunimade",
-				FollowCount:   0,
-				FollowerCount: 0,
-				IsFollow:      false,
-			},
-			PlayURL:       "https://www.w3schools.com/html/movie.mp4",
-			CoverURL:      "https://cdn.pixabay.com/photo/2016/03/27/18/10/bear-1283347_1280.jpg",
-			FavoriteCount: 0,
-			CommentCount:  0,
-			IsFavorite:    false,
+	var latestDate int64
+	if req.LatestTime == nil {
+		latestDate = time.Now().Unix() * 1000
+	} else {
+		latestDate, _ = strconv.ParseInt(*req.LatestTime, 10, 64)
+	}
+	feedResponse, err := rpc.VideoRpcClient.Feed(context.Background(),
+		&videoservice.DouyinFeedRequest{
+			LatestTime: latestDate,
 		},
+	)
+	resp := new(api.FeedResp)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = fmt.Sprintf("5v", err)
+		return
 	}
 
+	resp.StatusCode = 0
+	resp.NextTime = time.Now().Unix()
+	resp.VideoList = utils2.CastUserserviceVideoToApiVideo(feedResponse.VideoList)
 	c.JSON(consts.StatusOK, resp)
 }
 
