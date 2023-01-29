@@ -4,18 +4,23 @@
 
 package model
 
+import (
+	"time"
+)
+
 const TableNameTVideo = "t_video"
 
 // TVideo mapped from table <t_video>
 type TVideo struct {
-	ID            int64  `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true" json:"id"`    // 视频id
-	AuthorID      int64  `gorm:"column:author_id;type:int(10) unsigned;not null" json:"author_id"`           // 作者id
-	PlayURL       string `gorm:"column:play_url;type:varchar(255);not null" json:"play_url"`                 // 视频链接
-	CoverURL      string `gorm:"column:cover_url;type:varchar(255);not null" json:"cover_url"`               // 视频封面链接
-	FavoriteCount int64  `gorm:"column:favorite_count;type:int(10) unsigned;not null" json:"favorite_count"` // 点赞数
-	CommentCount  int64  `gorm:"column:comment_count;type:int(10) unsigned;not null" json:"comment_count"`   // 评论数
-	IsFavorite    bool   `gorm:"column:is_favorite;type:tinyint(1);not null" json:"is_favorite"`             // 是否已点赞(0为未点赞, 1为已点赞)
-	Title         string `gorm:"column:title;type:varchar(255);not null" json:"title"`                       // 视频标题
+	ID            int64     `gorm:"column:id;type:int(10) unsigned;primaryKey;autoIncrement:true" json:"id"`    // 视频id
+	AuthorID      int64     `gorm:"column:author_id;type:int(10) unsigned;not null" json:"author_id"`           // 作者id
+	PlayURL       string    `gorm:"column:play_url;type:varchar(255);not null" json:"play_url"`                 // 视频链接
+	CoverURL      string    `gorm:"column:cover_url;type:varchar(255);not null" json:"cover_url"`               // 视频封面链接
+	FavoriteCount int64     `gorm:"column:favorite_count;type:int(10) unsigned;not null" json:"favorite_count"` // 点赞数
+	CommentCount  int64     `gorm:"column:comment_count;type:int(10) unsigned;not null" json:"comment_count"`   // 评论数
+	IsFavorite    bool      `gorm:"column:is_favorite;type:tinyint(1);not null" json:"is_favorite"`             // 是否已点赞(0为未点赞, 1为已点赞)
+	Title         string    `gorm:"column:title;type:varchar(255);not null" json:"title"`                       // 视频标题
+	CreateDate    time.Time `gorm:"column:create_date;type:datetime;not null" json:"create_date"`               // 视频上传时间
 }
 
 // TableName TVideo's table name

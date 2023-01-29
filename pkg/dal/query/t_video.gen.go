@@ -35,6 +35,7 @@ func newTVideo(db *gorm.DB, opts ...gen.DOOption) tVideo {
 	_tVideo.CommentCount = field.NewInt64(tableName, "comment_count")
 	_tVideo.IsFavorite = field.NewBool(tableName, "is_favorite")
 	_tVideo.Title = field.NewString(tableName, "title")
+	_tVideo.CreateDate = field.NewTime(tableName, "create_date")
 
 	_tVideo.fillFieldMap()
 
@@ -53,6 +54,7 @@ type tVideo struct {
 	CommentCount  field.Int64  // 评论数
 	IsFavorite    field.Bool   // 是否已点赞(0为未点赞, 1为已点赞)
 	Title         field.String // 视频标题
+	CreateDate    field.Time   // 视频上传时间
 
 	fieldMap map[string]field.Expr
 }
@@ -77,6 +79,7 @@ func (t *tVideo) updateTableName(table string) *tVideo {
 	t.CommentCount = field.NewInt64(table, "comment_count")
 	t.IsFavorite = field.NewBool(table, "is_favorite")
 	t.Title = field.NewString(table, "title")
+	t.CreateDate = field.NewTime(table, "create_date")
 
 	t.fillFieldMap()
 
@@ -99,7 +102,7 @@ func (t *tVideo) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tVideo) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 8)
+	t.fieldMap = make(map[string]field.Expr, 9)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["author_id"] = t.AuthorID
 	t.fieldMap["play_url"] = t.PlayURL
@@ -108,6 +111,7 @@ func (t *tVideo) fillFieldMap() {
 	t.fieldMap["comment_count"] = t.CommentCount
 	t.fieldMap["is_favorite"] = t.IsFavorite
 	t.fieldMap["title"] = t.Title
+	t.fieldMap["create_date"] = t.CreateDate
 }
 
 func (t tVideo) clone(db *gorm.DB) tVideo {
