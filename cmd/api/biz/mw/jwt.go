@@ -19,18 +19,11 @@ func JwtMiddleware() app.HandlerFunc {
 		if tokenStr == "" {
 			tokenStr = c.PostForm("token") //body获取
 			if tokenStr == "" {
-				c.JSON(http.StatusOK, utils.H{"code": 0, "msg": "用户不存在"})
+				c.JSON(http.StatusOK, utils.H{"code": 0, "msg": "token无效"})
 				c.Abort() //阻止执行
 				return
 			}
 		}
-		//token格式错误
-		//tokenSlice := strings.SplitN(tokenStr, " ", 2)
-		//if len(tokenSlice) != 2 && tokenSlice[0] != "Bearer" {
-		//	c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "token格式错误"})
-		//	c.Abort() //阻止执行
-		//	return
-		//}
 		//验证token
 		tokenStruck, ok := jwtutil.CheckToken(tokenStr)
 		if !ok {

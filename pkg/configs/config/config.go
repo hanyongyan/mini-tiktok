@@ -16,4 +16,10 @@ type GlobalConfig struct {
 		Host string
 		Port int
 	} `mapstructure:"redis"`
+	FtpConfig struct {
+		Host     string
+		Port     int
+		Username string
+		Password string
+	} `mapstructure:"ftp"`
 }

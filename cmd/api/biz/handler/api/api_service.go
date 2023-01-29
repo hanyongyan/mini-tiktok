@@ -43,13 +43,20 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	resp := new(api.FeedResp)
 	if err != nil {
 		resp.StatusCode = 1
-		resp.StatusMessage = fmt.Sprintf("5v", err)
+		resp.StatusMessage = fmt.Sprintf("获取视频失败：%v", err)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
 	resp.StatusCode = 0
 	resp.NextTime = time.Now().Unix()
-	resp.VideoList = utils2.CastUserserviceVideoToApiVideo(feedResponse.VideoList)
+	if feedResponse == nil || feedResponse.VideoList == nil {
+		resp.StatusMessage = fmt.Sprintf("获取视频失败, error：%v", err)
+		resp.VideoList = []*api.Video{}
+	} else {
+		resp.VideoList = utils2.CastUserserviceVideoToApiVideo(feedResponse.VideoList)
+	}
+	hlog.Infof("feed: %+v", resp)
 	c.JSON(consts.StatusOK, resp)
 }
 
@@ -57,16 +64,18 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 // @router /douyin/user/register [POST]
 func UserRegister(ctx context.Context, c *app.RequestContext) {
 	var err error
-	var req api.UserRegisterReq
-	err = c.BindAndValidate(&req)
+	username := c.Query("username")
+	password := c.Query("password")
+	hlog.Info("start call login rpc api")
+	hlog.Infof("name: %v, pass: %v", username, password)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
 
 	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userservice.DouyinUserRegisterRequest{
-		Username: req.Username,
-		Password: req.Password,
+		Username: username,
+		Password: password,
 	})
 	if err != nil {
 		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
@@ -89,6 +98,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 	username := c.Query("username")
 	password := c.Query("password")
 	hlog.Info("start call login rpc api")
+	hlog.Infof("name: %v, pass: %v", username, password)
 	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userservice.DouyinUserLoginRequest{
 		Username: username,
 		Password: password,
@@ -130,6 +140,7 @@ func User(ctx context.Context, c *app.RequestContext) {
 	userId, _ := strconv.Atoi(req.UserID)
 	info, err := rpc.UserRpcClient.Info(context.Background(), &userservice.DouyinUserRequest{UserId: int64(userId), Token: req.Token})
 	if err != nil {
+		hlog.Infof("获取用户信息时error occur: %v", err)
 		c.JSON(consts.StatusOK, utils.H{
 			"code":    0,
 			"message": err.Error(),
