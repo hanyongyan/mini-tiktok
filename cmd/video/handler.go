@@ -78,6 +78,9 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 			return
 		}
 	}
+	if resList == nil {
+		resList = []queryVideoListRes{}
+	}
 	resp = &videoservice.DouyinFeedResponse{
 		StatusCode: 0,
 		VideoList: ramda.Map(func(model queryVideoListRes) *videoservice.Video {

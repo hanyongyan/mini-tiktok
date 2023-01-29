@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"mini_tiktok/cmd/user/utils"
 	userservice "mini_tiktok/kitex_gen/userservice"
 	"mini_tiktok/pkg/dal/model"
@@ -80,8 +81,9 @@ func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserR
 	tfollow := query.Q.TFollow
 	claims, _ := jwtutil.CheckToken(req.Token)
 	toUserId := claims.UserId
+	klog.Infof("userid: %v touserId: %v")
 	findFollowRes, err := tfollow.WithContext(context.Background()).
-		Where(tfollow.UserID.Eq(userId), tfollow.FollowerID.Eq(int64(toUserId))).
+		Where(tfollow.UserID.Eq(userId), tfollow.FollowerID.Eq(toUserId)).
 		First()
 	if err != nil {
 		return
