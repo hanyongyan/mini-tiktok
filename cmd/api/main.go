@@ -20,6 +20,7 @@ import (
 )
 
 func Init() {
+	// 配置初始化要放在最前面
 	config.Init()
 	rpc.Init()
 	hlog.SetLogger(hertzlogrus.NewLogger())

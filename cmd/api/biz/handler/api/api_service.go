@@ -9,6 +9,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/nanakura/go-ramda"
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
 	userservice "mini_tiktok/kitex_gen/userservice"
@@ -172,9 +173,22 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
 	resp := new(api.PublishActionResp)
-
+	actionResponse, err := rpc.VideoRpcClient.PublishAction(context.Background(), &videoservice.DouyinPublishActionRequest{
+		Token: req.Token,
+		Data: ramda.Map(func(in int8) byte {
+			return byte(in)
+		})(req.Data),
+		Title: req.Title,
+	})
+	if err != nil || actionResponse == nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = fmt.Sprintf("上传失败: %v", err)
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	resp.StatusCode = int64(actionResponse.StatusCode)
+	resp.StatusMessage = actionResponse.StatusMsg
 	c.JSON(consts.StatusOK, resp)
 }
 
@@ -182,7 +196,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 // @router /douyin/publish/list [GET]
 func PublishList(ctx context.Context, c *app.RequestContext) {
 	var err error
-	var req api.PublishActionReq
+	var req api.PublishListReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
@@ -190,7 +204,27 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(api.PublishListResp)
-
+	userId, err := strconv.Atoi(req.UserID)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	publishListResponse, err := rpc.VideoRpcClient.PublishList(context.Background(), &videoservice.DouyinPublishListRequest{
+		Token:  req.Token,
+		UserId: int64(userId),
+	})
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+	if resp.VideoList == nil {
+		resp.VideoList = []*api.Video{}
+	}
+	resp.VideoList = utils2.CastUserserviceVideoToApiVideo(publishListResponse.VideoList)
 	c.JSON(consts.StatusOK, resp)
 }
 
