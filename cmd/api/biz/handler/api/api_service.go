@@ -96,7 +96,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 	username := c.Query("username")
 	password := c.Query("password")
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	hlog.Info("start call login rpc api")
@@ -228,7 +228,7 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	var req api.FavoriteActionReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 
@@ -241,10 +241,7 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	})
 
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{
-			"code":    0,
-			"message": err.Error(),
-		})
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	resp := &api.FavoriteActionResp{
@@ -262,7 +259,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	var req api.FavoriteListReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	userId, _ := strconv.Atoi(req.UserID)
@@ -271,10 +268,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		Token:  req.Token,
 	})
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{
-			"code":    0,
-			"message": err.Error(),
-		})
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 
@@ -293,7 +287,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 	var req api.CommentActionReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	videoId, _ := strconv.Atoi(req.VideoID)
@@ -308,10 +302,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			CommentId:  int64(CommentId),
 		})
 		if err != nil {
-			c.JSON(consts.StatusOK, utils.H{
-				"code":    401,
-				"message": err.Error(),
-			})
+			c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 			return
 		}
 		resp := &api.CommentActionResp{
@@ -328,10 +319,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			ActionType:  int32(act),
 		})
 		if err != nil {
-			c.JSON(consts.StatusOK, utils.H{
-				"code":    401,
-				"message": err.Error(),
-			})
+			c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 			return
 		}
 
@@ -363,7 +351,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	var req api.CommentListReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	videoId, _ := strconv.Atoi(req.VideoID)
@@ -373,7 +361,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	})
 
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	c.JSON(consts.StatusOK, resp)
@@ -426,19 +414,17 @@ func RelationFollowList(ctx context.Context, c *app.RequestContext) {
 	var req api.RelationFollowListReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
-	hlog.Info("start call login rpc api")
 	// 将 字符串 转为 int64
 	userId, _ := strconv.ParseInt(req.UserID, 10, 64)
 	resp, err := rpc.UserRpcClient.FollowList(ctx, &userservice.DouyinRelationFollowListRequest{
 		UserId: userId,
 		Token:  req.Token,
 	})
-	hlog.Info("call login rpc api end")
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 
@@ -453,12 +439,12 @@ func RelationFollowerList(ctx context.Context, c *app.RequestContext) {
 	var resp api.RelationFollowerListResp
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	userId, err := strconv.ParseInt(req.UserID, 10, 64)
 	if err != nil {
-		c.String(consts.StatusOK, "请求参数错误")
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 	}
 	result, err := rpc.UserRpcClient.FollowerList(ctx, &userservice.DouyinRelationFollowerListRequest{
 		UserId: userId,
@@ -481,12 +467,12 @@ func RelationFriendList(ctx context.Context, c *app.RequestContext) {
 	var resp api.RelationFriendListResp
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	userId, err := strconv.ParseInt(req.UserID, 10, 64)
 	if err != nil {
-		c.JSON(consts.StatusOK, "请求数据错误")
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	result, err := rpc.UserRpcClient.FriendList(ctx, &userservice.DouyinRelationFriendListRequest{
