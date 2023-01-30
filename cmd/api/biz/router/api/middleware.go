@@ -18,6 +18,8 @@ import (
 func rootMw() []app.HandlerFunc {
 	// your code...
 	return []app.HandlerFunc{
+		// client request logger
+		mw.RequestLogger(),
 		// use recovery mw
 		recovery.Recovery(recovery.WithRecoveryHandler(
 			func(ctx context.Context, c *app.RequestContext, err interface{}, stack []byte) {
