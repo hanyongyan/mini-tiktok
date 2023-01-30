@@ -3,13 +3,14 @@ package cache
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/go-redis/redis/v8"
 	"github.com/hertz-contrib/cache"
 	"github.com/hertz-contrib/cache/persist"
 	"github.com/spf13/viper"
 	"mini_tiktok/pkg/consts"
-	"time"
 )
 
 var (

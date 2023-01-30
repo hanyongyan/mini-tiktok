@@ -4,16 +4,15 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/spf13/viper"
 	"log"
 	"os"
+
+	"github.com/spf13/viper"
 )
 
 var GlobalConfigs GlobalConfig
 
-var (
-	ConfPath string
-)
+var ConfPath string
 
 func init() {
 	configDefaultPath := "../../pkg/configs/config/config.yaml"

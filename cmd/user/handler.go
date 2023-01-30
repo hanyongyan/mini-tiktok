@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"mini_tiktok/cmd/user/utils"
 	userservice "mini_tiktok/kitex_gen/userservice"
@@ -208,7 +209,7 @@ func (s *UserServiceImpl) FollowList(ctx context.Context, req *userservice.Douyi
 	// 进行查询用户
 	queryUser := query.Q.TUser
 	// 返回的用户信息
-	//users := &[]model.TUser{}
+	// users := &[]model.TUser{}
 	// 只进行查询关注用户的 id
 	follows, err := queryFollow.WithContext(ctx).Select(queryFollow.FollowerID).Where(queryFollow.UserID.Eq(req.UserId)).Find()
 	if err != nil {
@@ -258,7 +259,7 @@ func (s *UserServiceImpl) FollowerList(ctx context.Context, req *userservice.Dou
 	for i, follower := range followers {
 		followersId[i] = follower.UserID
 	}
-	//进行查询粉丝用户信息
+	// 进行查询粉丝用户信息
 	t_users, err := queryUser.WithContext(ctx).Where(queryUser.ID.In(followersId...)).Find()
 	if err != nil {
 		return
