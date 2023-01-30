@@ -453,13 +453,26 @@ func RelationFollowerList(ctx context.Context, c *app.RequestContext) {
 func RelationFriendList(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req api.RelationFriendListReq
+	var resp api.RelationFriendListResp
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
-	resp := new(api.RelationFriendListResp)
-
-	c.JSON(consts.StatusOK, resp)
+	userId, err := strconv.ParseInt(req.UserID, 10, 64)
+	if err != nil {
+		c.JSON(consts.StatusOK, "请求数据错误")
+		return
+	}
+	result, err := rpc.UserRpcClient.FriendList(ctx, &userservice.DouyinRelationFriendListRequest{
+		UserId: userId,
+		Token:  req.Token,
+	})
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		resp.UserList = nil
+		c.JSON(consts.StatusOK, resp)
+	}
+	c.JSON(consts.StatusOK, result)
 }
