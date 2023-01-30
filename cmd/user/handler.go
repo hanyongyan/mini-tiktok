@@ -112,6 +112,7 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 	// 关注操作
 	queryFollow := query.Q.TFollow
 	queryFriend := query.Q.TFriend
+	queryUser := query.Q.TUser
 	resp = &userservice.DouyinRelationActionResponse{}
 
 	claims, flag := utils2.CheckToken(req.Token)
@@ -135,6 +136,11 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 				return nil, err
 			}
 			// 进行到此步说明 添加关注成功
+			// 登录用户的关注数 +1
+			_, _ = queryUser.WithContext(ctx).Where(queryUser.ID.Eq(claims.UserId)).Update(queryUser.FollowCount, queryUser.FollowCount.Add(1))
+			// 关注用户的粉丝数 +1
+			_, _ = queryUser.WithContext(ctx).Where(queryUser.ID.Eq(req.ToUserId)).Update(queryUser.FollowerCount, queryUser.FollowerCount.Add(1))
+			// 查看关注用户是否关注了自己
 			whetherToCare, _ := queryFollow.WithContext(ctx).Where(queryFollow.UserID.Eq(follow.FollowerID)).
 				Where(queryFollow.FollowerID.Eq(follow.UserID)).First()
 			// 所关注的用户关注了自己
@@ -175,6 +181,11 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 		if err != nil {
 			return nil, err
 		}
+		// 登录用户的关注数 -1
+		_, _ = queryUser.WithContext(ctx).Where(queryUser.ID.Eq(claims.UserId)).Update(queryUser.FollowCount, queryUser.FollowCount.Sub(1))
+		// 关注用户的粉丝数 -1
+		_, _ = queryUser.WithContext(ctx).Where(queryUser.ID.Eq(req.ToUserId)).Update(queryUser.FollowerCount, queryUser.FollowerCount.Sub(1))
+
 		// 查看是否存好友关系，如果存在好友关系，将好友关系从数据库中进行删除
 		isFriend, _ := queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).Find()
 		// 说明存在好友关系
