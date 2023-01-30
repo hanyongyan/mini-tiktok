@@ -74,11 +74,7 @@ func main() {
 	Init()
 	svr := videoservice.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
-<<<<<<< HEAD
 		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
-=======
-		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
->>>>>>> lzx
 		server.WithMiddleware(mw.CommonMiddleware),
 		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.VideoServiceName}),

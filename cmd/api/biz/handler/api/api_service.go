@@ -13,13 +13,9 @@ import (
 	"mini_tiktok/cmd/api/biz/rpc"
 	userservice "mini_tiktok/kitex_gen/userservice"
 	"mini_tiktok/kitex_gen/videoservice"
-<<<<<<< HEAD
 	utils2 "mini_tiktok/pkg/utils"
-	"time"
-
-=======
->>>>>>> lzx
 	"strconv"
+	"time"
 )
 
 // Feed .
@@ -97,18 +93,12 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 // @router /douyin/user/login [POST]
 func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
-<<<<<<< HEAD
 	username := c.Query("username")
 	password := c.Query("password")
-=======
-	var req api.UserLoginReq
-	req.Username = c.Query("username")
-	req.Password = c.Query("password")
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
->>>>>>> lzx
 	hlog.Info("start call login rpc api")
 	hlog.Infof("name: %v, pass: %v", username, password)
 	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userservice.DouyinUserLoginRequest{

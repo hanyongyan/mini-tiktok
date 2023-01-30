@@ -3,28 +3,22 @@ package main
 import (
 	"bytes"
 	"context"
-<<<<<<< HEAD
+	"errors"
 	"fmt"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
 	"github.com/nanakura/go-ramda"
 	"mini_tiktok/cmd/video/ftpUtil"
 	videoservice "mini_tiktok/kitex_gen/videoservice"
+	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/configs/config"
+	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
 	"mini_tiktok/pkg/utils"
-	"time"
-=======
-	"errors"
-	"fmt"
-	videoservice "mini_tiktok/kitex_gen/videoservice"
-	"mini_tiktok/pkg/cache"
-	"mini_tiktok/pkg/consts"
-	"mini_tiktok/pkg/dal/query"
 	jwtutil "mini_tiktok/pkg/utils"
 	"strconv"
->>>>>>> lzx
+	"time"
 )
 
 // VideoServiceImpl implements the last service interface defined in the IDL.
