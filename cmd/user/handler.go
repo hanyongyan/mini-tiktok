@@ -109,7 +109,8 @@ func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserR
 // Action implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRelationActionRequest) (resp *userservice.DouyinRelationActionResponse, err error) {
 	// 关注操作
-	q := query.Q.TFollow
+	queryFollow := query.Q.TFollow
+	queryFriend := query.Q.TFriend
 	resp = &userservice.DouyinRelationActionResponse{}
 
 	claims, flag := utils2.CheckToken(req.Token)
@@ -124,14 +125,26 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 	}
 	if req.ActionType == 1 {
 		// 关注操作
-		resultFollow, err := q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).First()
+		resultFollow, err := queryFollow.WithContext(ctx).Where(queryFollow.UserID.Eq(follow.UserID)).
+			Where(queryFollow.FollowerID.Eq(follow.FollowerID)).First()
 		// 说明还没有关注过
 		if err != nil && err.Error() == "record not found" {
-			err = q.WithContext(ctx).Create(follow)
+			err = queryFollow.WithContext(ctx).Create(follow)
 			if err != nil {
 				return nil, err
 			}
 			// 进行到此步说明 添加关注成功
+			whetherToCare, _ := queryFollow.WithContext(ctx).Where(queryFollow.UserID.Eq(follow.FollowerID)).
+				Where(queryFollow.FollowerID.Eq(follow.UserID)).First()
+			// 所关注的用户关注了自己
+			// 添加好友数据
+			if whetherToCare != nil {
+				_ = queryFriend.WithContext(ctx).Create(&model.TFriend{
+					UserID:   follow.UserID,
+					FriendID: follow.FollowerID,
+				})
+			}
+
 			resp.StatusCode = 0
 			resp.StatusMsg = "关注成功"
 			return resp, nil
@@ -145,7 +158,7 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 	} else {
 		// 取消关注操作
 		// 先进行是否存在这样一种关注关系
-		_, err := q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).First()
+		_, err := queryFollow.WithContext(ctx).Where(queryFollow.UserID.Eq(follow.UserID)).Where(queryFollow.FollowerID.Eq(follow.FollowerID)).First()
 		// 查询不到用户
 		if err != nil && err.Error() == "record not found" {
 			err = errors.New("请勿重复取消关注")
@@ -153,9 +166,18 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 		}
 
 		// 进行删除数据库中的数据
-		_, err = q.WithContext(ctx).Where(q.UserID.Eq(follow.UserID)).Where(q.FollowerID.Eq(follow.FollowerID)).Delete()
+		_, err = queryFollow.WithContext(ctx).Where(queryFollow.UserID.Eq(follow.UserID)).Where(queryFollow.FollowerID.Eq(follow.FollowerID)).Delete()
 		if err != nil {
 			return nil, err
+		}
+		// 查看是否存好友关系，如果存在好友关系，将好友关系从数据库中进行删除
+		isFriend, _ := queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).
+			Or(queryFriend.FriendID.Eq(follow.UserID), queryFriend.UserID.Eq(follow.FollowerID)).Find()
+		// 说明存在好友关系
+		if isFriend != nil {
+			// 进行删除好友关系
+			_, _ = queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).
+				Or(queryFriend.FriendID.Eq(follow.UserID), queryFriend.UserID.Eq(follow.FollowerID)).Delete()
 		}
 		resp.StatusMsg = "取消关注成功"
 		resp.StatusCode = 0
