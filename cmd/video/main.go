@@ -26,8 +26,9 @@ import (
 )
 
 func Init() {
+	// 配置的初始化要放在最前面
+  config.Init()
 	//task.Init()
-	config.Init()
 	cache.Init()
 	rpc.Init()
 	dal.Init()

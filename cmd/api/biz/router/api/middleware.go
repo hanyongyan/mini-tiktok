@@ -11,8 +11,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/hertz-contrib/gzip"
-	"github.com/hertz-contrib/requestid"
-	"go.opentelemetry.io/otel/trace"
 	"mini_tiktok/cmd/api/biz/mw"
 	"mini_tiktok/pkg/errno"
 )
@@ -20,6 +18,8 @@ import (
 func rootMw() []app.HandlerFunc {
 	// your code...
 	return []app.HandlerFunc{
+		// client request logger
+		mw.RequestLogger(),
 		// use recovery mw
 		recovery.Recovery(recovery.WithRecoveryHandler(
 			func(ctx context.Context, c *app.RequestContext, err interface{}, stack []byte) {
@@ -35,12 +35,6 @@ func rootMw() []app.HandlerFunc {
 		// use limiter mw
 		//limiter.AdaptiveLimit(limiter.WithCPUThreshold(900)),
 		// use requestId mw & bind with traceId
-		requestid.New(
-			requestid.WithGenerator(func(ctx context.Context, c *app.RequestContext) string {
-				traceID := trace.SpanFromContext(ctx).SpanContext().TraceID().String()
-				return traceID
-			}),
-		),
 	}
 }
 

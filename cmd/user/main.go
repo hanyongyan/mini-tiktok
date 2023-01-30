@@ -23,6 +23,7 @@ import (
 )
 
 func Init() {
+	// 配置的初始化要放在最前面
 	config.Init()
 	rpc.Init()
 	dal.Init()

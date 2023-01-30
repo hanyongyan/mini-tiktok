@@ -1,7 +1,17 @@
 
 # Start
-Preparation
-Startup nacos and opentelemetry
+#### Preparation
+Startup middleware
+- nacos 
+- jaeger
+- opentelemetry
+- redis
+
+Startup necessary services
+- ftp server(eg. [FileZilla](https://www.filezilla.cn/))
+- nginx
+
+#### Startup
 then
 ```shell
 go mod download
