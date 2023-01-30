@@ -9,6 +9,7 @@ import (
 	"github.com/nanakura/go-ramda"
 	"mini_tiktok/cmd/video/ftpUtil"
 	videoservice "mini_tiktok/kitex_gen/videoservice"
+	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
 	"mini_tiktok/pkg/utils"
@@ -26,8 +27,7 @@ func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *videoservice.
 	tv := query.Q.TVideo
 	cliams, _ := utils.CheckToken(req.Token)
 	userId := cliams.UserId
-	// TODO handle ftp read api
-	playUrl := fmt.Sprintf("")
+	playUrl := fmt.Sprintf("%s/%s", config.GlobalConfigs.StaticConfig.Url, path)
 	err = tv.WithContext(context.Background()).
 		Create(&model.TVideo{
 			AuthorID:      userId,
