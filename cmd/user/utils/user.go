@@ -19,7 +19,7 @@ func CheckUser(q *query.Query, username, password string) (res *model.TUser, err
 		err = fmt.Errorf("用户不存在: %v", username)
 		return
 	}
-	if pwd := ScryptPwd(res.Password); pwd != password {
+	if pwd := ScryptPwd(password); pwd != res.Password {
 		err = fmt.Errorf("密码错误: %v", password)
 		return
 	}
