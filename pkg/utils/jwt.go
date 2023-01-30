@@ -30,9 +30,16 @@ func CheckToken(token string) (*Claims, bool) {
 	tokenObj, _ := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(consts.SecretKey), nil
 	})
-	if key, _ := tokenObj.Claims.(*Claims); tokenObj.Valid {
-		return key, true
-	} else {
+	//if key, _ := tokenObj.Claims.(*Claims); tokenObj.Valid {
+	//	return key, true
+	//} else {
+	//	return nil, false
+	//}
+	if tokenObj != nil {
+		if claims, ok := tokenObj.Claims.(*Claims); ok && tokenObj.Valid {
+			return claims, true
+		}
 		return nil, false
 	}
+	return nil, false
 }

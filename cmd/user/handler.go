@@ -49,7 +49,8 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *userservice.DouyinU
 		err = fmt.Errorf("注册失败：用户已存在 %w", err)
 		return
 	}
-	newUser := &model.TUser{Name: req.Username, Password: req.Password}
+	pwd := utils.ScryptPwd(req.Password)
+	newUser := &model.TUser{Name: req.Username, Password: pwd}
 	err = q.WithContext(context.Background()).TUser.Create(newUser)
 	if err != nil {
 		err = fmt.Errorf("注册失败: %w", err)
