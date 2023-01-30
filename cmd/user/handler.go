@@ -143,6 +143,10 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 					UserID:   follow.UserID,
 					FriendID: follow.FollowerID,
 				})
+				_ = queryFriend.WithContext(ctx).Create(&model.TFriend{
+					UserID:   follow.FollowerID,
+					FriendID: follow.UserID,
+				})
 			}
 
 			resp.StatusCode = 0
@@ -171,13 +175,12 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 			return nil, err
 		}
 		// 查看是否存好友关系，如果存在好友关系，将好友关系从数据库中进行删除
-		isFriend, _ := queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).
-			Or(queryFriend.FriendID.Eq(follow.UserID), queryFriend.UserID.Eq(follow.FollowerID)).Find()
+		isFriend, _ := queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).Find()
 		// 说明存在好友关系
 		if isFriend != nil {
 			// 进行删除好友关系
-			_, _ = queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).
-				Or(queryFriend.FriendID.Eq(follow.UserID), queryFriend.UserID.Eq(follow.FollowerID)).Delete()
+			_, _ = queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).Delete()
+			_, _ = queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.UserID), queryFriend.UserID.Eq(follow.FollowerID)).Delete()
 		}
 		resp.StatusMsg = "取消关注成功"
 		resp.StatusCode = 0
