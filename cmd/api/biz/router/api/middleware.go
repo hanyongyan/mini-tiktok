@@ -96,9 +96,10 @@ func _publishlistMw() []app.HandlerFunc {
 
 func _relationMw() []app.HandlerFunc {
 	// your code...
-	return []app.HandlerFunc{
-		mw.JwtMiddleware(),
-	}
+	//return []app.HandlerFunc{
+	//	mw.JwtMiddleware(),
+	//}
+	return nil
 }
 
 func _relation_ctionMw() []app.HandlerFunc {

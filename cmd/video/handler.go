@@ -37,6 +37,7 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *videoservice.Do
 // 赞操作
 // FavoriteAction implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice.DouyinFavoriteActionRequest) (resp *videoservice.DouyinFavoriteActionResponse, err error) {
+	fmt.Println("in 点赞" + strconv.FormatInt(req.VideoId, 10))
 	// 通过 token 解析出当前用户
 	claims, flag := jwtutil.CheckToken(req.Token)
 	// 说明 token 已经过期
@@ -45,16 +46,15 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 	}
 
 	//判断当前用户是否点赞
-	result, err := cache.RedisCache.RedisClient.SIsMember(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(claims.UserId, 10), req.VideoId).Result()
+	result, err := cache.RedisCache.RedisClient.SIsMember(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
 	if err != nil {
 		err = fmt.Errorf("redis访问失败")
 		return
 	}
-
 	//已点过赞，取消点赞
 	if result {
 		// redis数据库中删除关联
-		_, err1 := cache.RedisCache.RedisClient.SRem(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(claims.UserId, 10), req.VideoId).Result()
+		_, err1 := cache.RedisCache.RedisClient.SRem(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
 		if err1 != nil {
 			err1 = fmt.Errorf("redis 取消点赞失败")
 			return
@@ -69,16 +69,12 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 	// 在数据库中查询点赞信息
 	q := query.Q
 	favorite := q.TFavorite
-	first, err := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId), favorite.VideoID.Eq(req.VideoId)).First()
-
-	if err != nil {
-		err = fmt.Errorf("数据库获取数据失败")
-	}
+	first, _ := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId), favorite.VideoID.Eq(req.VideoId)).First()
 
 	// 查询为空
 	if first == nil {
 		// 将点赞存入redis
-		cache.RedisCache.RedisClient.SAdd(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(claims.UserId, 10), req.VideoId, 0)
+		cache.RedisCache.RedisClient.SAdd(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10), 0)
 		resp = &videoservice.DouyinFavoriteActionResponse{
 			StatusCode: 0,
 			StatusMsg:  "已成功点赞",

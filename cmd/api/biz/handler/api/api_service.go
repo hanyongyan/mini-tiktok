@@ -41,7 +41,6 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
 	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userservice.DouyinUserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
@@ -65,7 +64,8 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req api.UserLoginReq
-	err = c.BindAndValidate(&req)
+	req.Username = c.Query("username")
+	req.Password = c.Query("password")
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return

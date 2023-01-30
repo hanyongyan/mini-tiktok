@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	kitexlogrus "github.com/kitex-contrib/obs-opentelemetry/logging/logrus"
@@ -20,14 +21,13 @@ import (
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
-	"mini_tiktok/pkg/task"
 	"net"
 )
 
 func Init() {
-	task.Init()
-	cache.Init()
+	//task.Init()
 	config.Init()
+	cache.Init()
 	rpc.Init()
 	dal.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
@@ -72,7 +72,7 @@ func main() {
 	Init()
 	svr := videoservice.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
-		//server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
+		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
 		server.WithMiddleware(mw.CommonMiddleware),
 		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.VideoServiceName}),
