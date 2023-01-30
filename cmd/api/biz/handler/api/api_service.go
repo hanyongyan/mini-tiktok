@@ -15,9 +15,8 @@ import (
 	userservice "mini_tiktok/kitex_gen/userservice"
 	"mini_tiktok/kitex_gen/videoservice"
 	utils2 "mini_tiktok/pkg/utils"
-	"time"
-
 	"strconv"
+	"time"
 )
 
 // Feed .
@@ -72,7 +71,6 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
-
 	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userservice.DouyinUserRegisterRequest{
 		Username: username,
 		Password: password,
@@ -97,6 +95,10 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
 	username := c.Query("username")
 	password := c.Query("password")
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
 	hlog.Info("start call login rpc api")
 	hlog.Infof("name: %v, pass: %v", username, password)
 	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userservice.DouyinUserLoginRequest{
@@ -219,7 +221,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-// FavoriteAction .
+// FavoriteAction .点赞接口
 // @router /douyin/favorite/action [POST]
 func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	var err error
@@ -230,12 +232,30 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp := new(api.FavoriteActionResp)
+	videoId, _ := strconv.Atoi(req.VideoID)
+	actionType, _ := strconv.Atoi(req.ActionType)
+	r, err := rpc.VideoRpcClient.FavoriteAction(context.Background(), &videoservice.DouyinFavoriteActionRequest{
+		Token:      req.Token,
+		VideoId:    int64(videoId),
+		ActionType: int32(actionType),
+	})
+
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"code":    0,
+			"message": err.Error(),
+		})
+		return
+	}
+	resp := &api.FavoriteActionResp{
+		StatusCode:    0,
+		StatusMessage: r.StatusMsg,
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
 
-// FavoriteList .
+// FavoriteList
 // @router /douyin/favorite/list [GET]
 func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	var err error
@@ -245,9 +265,24 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+	userId, _ := strconv.Atoi(req.UserID)
+	r, err := rpc.VideoRpcClient.FavoriteList(context.Background(), &videoservice.DouyinFavoriteListRequest{
+		UserId: int64(userId),
+		Token:  req.Token,
+	})
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"code":    0,
+			"message": err.Error(),
+		})
+		return
+	}
 
-	resp := new(api.FavoriteListResp)
-
+	resp := &videoservice.DouyinFavoriteListResponse{
+		StatusCode: 0,
+		StatusMsg:  "查询成功",
+		VideoList:  r.VideoList,
+	}
 	c.JSON(consts.StatusOK, resp)
 }
 
@@ -261,10 +296,64 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+	videoId, _ := strconv.Atoi(req.VideoID)
+	act, _ := strconv.Atoi(req.ActionType)
+	// 删除操作
+	if act == 2 {
+		CommentId, _ := strconv.Atoi(*req.CommentID)
+		info, err := rpc.VideoRpcClient.CommentAction(context.Background(), &videoservice.DouyinCommentActionRequest{
+			Token:      req.Token,
+			VideoId:    int64(videoId),
+			ActionType: int32(act),
+			CommentId:  int64(CommentId),
+		})
+		if err != nil {
+			c.JSON(consts.StatusOK, utils.H{
+				"code":    401,
+				"message": err.Error(),
+			})
+			return
+		}
+		resp := &api.CommentActionResp{
+			StatusCode:    int64(info.StatusCode),
+			StatusMessage: info.StatusMsg,
+		}
+		c.JSON(consts.StatusOK, resp)
+	} else {
+		// 评论操作
+		info, err := rpc.VideoRpcClient.CommentAction(context.Background(), &videoservice.DouyinCommentActionRequest{
+			Token:       req.Token,
+			VideoId:     int64(videoId),
+			CommentText: *req.CommentText,
+			ActionType:  int32(act),
+		})
+		if err != nil {
+			c.JSON(consts.StatusOK, utils.H{
+				"code":    401,
+				"message": err.Error(),
+			})
+			return
+		}
 
-	resp := new(api.CommentActionResp)
+		user := &api.User{
+			ID:            info.Comment.User.Id,
+			Name:          info.Comment.User.Name,
+			FollowCount:   info.Comment.User.FollowCount,
+			FollowerCount: info.Comment.User.FollowerCount,
+		}
+		resp := &api.CommentActionResp{
+			StatusCode:    int64(info.StatusCode),
+			StatusMessage: info.StatusMsg,
+			Comment: &api.Comment{
+				ID:         info.Comment.Id,
+				User:       user,
+				Content:    info.Comment.Content,
+				CreateDate: info.Comment.CreateDate,
+			},
+		}
 
-	c.JSON(consts.StatusOK, resp)
+		c.JSON(consts.StatusOK, resp)
+	}
 }
 
 // CommentList .
@@ -277,9 +366,16 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+	videoId, _ := strconv.Atoi(req.VideoID)
+	resp, err := rpc.VideoRpcClient.CommentList(context.Background(), &videoservice.DouyinCommentListRequest{
+		Token:   req.Token,
+		VideoId: int64(videoId),
+	})
 
-	resp := new(api.CommentListResp)
-
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
+		return
+	}
 	c.JSON(consts.StatusOK, resp)
 }
 
@@ -382,13 +478,26 @@ func RelationFollowerList(ctx context.Context, c *app.RequestContext) {
 func RelationFriendList(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req api.RelationFriendListReq
+	var resp api.RelationFriendListResp
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
-	resp := new(api.RelationFriendListResp)
-
-	c.JSON(consts.StatusOK, resp)
+	userId, err := strconv.ParseInt(req.UserID, 10, 64)
+	if err != nil {
+		c.JSON(consts.StatusOK, "请求数据错误")
+		return
+	}
+	result, err := rpc.UserRpcClient.FriendList(ctx, &userservice.DouyinRelationFriendListRequest{
+		UserId: userId,
+		Token:  req.Token,
+	})
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMessage = err.Error()
+		resp.UserList = nil
+		c.JSON(consts.StatusOK, resp)
+	}
+	c.JSON(consts.StatusOK, result)
 }

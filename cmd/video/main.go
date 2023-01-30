@@ -17,6 +17,7 @@ import (
 	"mini_tiktok/cmd/video/ftpUtil"
 	"mini_tiktok/cmd/video/rpc"
 	"mini_tiktok/kitex_gen/videoservice/videoservice"
+	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
@@ -26,7 +27,9 @@ import (
 
 func Init() {
 	// 配置的初始化要放在最前面
-	config.Init()
+  config.Init()
+	//task.Init()
+	cache.Init()
 	rpc.Init()
 	dal.Init()
 	ftpUtil.Init()

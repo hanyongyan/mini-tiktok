@@ -65,6 +65,7 @@ func main() {
 	}
 
 	Init()
+
 	svr := userservice.NewServer(new(UserServiceImpl),
 		server.WithServiceAddr(utils.NewNetAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.UserServiceAddr))),
 		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
