@@ -11,6 +11,7 @@ import (
 	api "mini_tiktok/cmd/api/biz/model/api"
 	"mini_tiktok/cmd/api/biz/rpc"
 	userservice "mini_tiktok/kitex_gen/userservice"
+	"mini_tiktok/kitex_gen/videoservice"
 	"strconv"
 )
 
@@ -206,10 +207,64 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+	videoId, _ := strconv.Atoi(req.VideoID)
+	act, _ := strconv.Atoi(req.ActionType)
+	// 删除操作
+	if act == 2 {
+		CommentId, _ := strconv.Atoi(*req.CommentID)
+		info, err := rpc.VideoRpcClient.CommentAction(context.Background(), &videoservice.DouyinCommentActionRequest{
+			Token:      req.Token,
+			VideoId:    int64(videoId),
+			ActionType: int32(act),
+			CommentId:  int64(CommentId),
+		})
+		if err != nil {
+			c.JSON(consts.StatusOK, utils.H{
+				"code":    401,
+				"message": err.Error(),
+			})
+			return
+		}
+		resp := &api.CommentActionResp{
+			StatusCode:    int64(info.StatusCode),
+			StatusMessage: info.StatusMsg,
+		}
+		c.JSON(consts.StatusOK, resp)
+	} else {
+		// 评论操作
+		info, err := rpc.VideoRpcClient.CommentAction(context.Background(), &videoservice.DouyinCommentActionRequest{
+			Token:       req.Token,
+			VideoId:     int64(videoId),
+			CommentText: *req.CommentText,
+			ActionType:  int32(act),
+		})
+		if err != nil {
+			c.JSON(consts.StatusOK, utils.H{
+				"code":    401,
+				"message": err.Error(),
+			})
+			return
+		}
 
-	resp := new(api.CommentActionResp)
+		user := &api.User{
+			ID:            info.Comment.User.Id,
+			Name:          info.Comment.User.Name,
+			FollowCount:   info.Comment.User.FollowCount,
+			FollowerCount: info.Comment.User.FollowerCount,
+		}
+		resp := &api.CommentActionResp{
+			StatusCode:    int64(info.StatusCode),
+			StatusMessage: info.StatusMsg,
+			Comment: &api.Comment{
+				ID:         info.Comment.Id,
+				User:       user,
+				Content:    info.Comment.Content,
+				CreateDate: info.Comment.CreateDate,
+			},
+		}
 
-	c.JSON(consts.StatusOK, resp)
+		c.JSON(consts.StatusOK, resp)
+	}
 }
 
 // CommentList .
@@ -222,9 +277,16 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+	videoId, _ := strconv.Atoi(req.VideoID)
+	resp, err := rpc.VideoRpcClient.CommentList(context.Background(), &videoservice.DouyinCommentListRequest{
+		Token:   req.Token,
+		VideoId: int64(videoId),
+	})
 
-	resp := new(api.CommentListResp)
-
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{"status": "nil"})
+		return
+	}
 	c.JSON(consts.StatusOK, resp)
 }
 

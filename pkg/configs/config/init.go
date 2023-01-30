@@ -10,7 +10,7 @@ import (
 var GlobalConfigs GlobalConfig
 
 func Init() {
-	configFile, err := os.ReadFile("../../pkg/configs/config/config.yaml")
+	configFile, err := os.ReadFile("../../pkg/configs/config/config.template.yaml")
 	if err != nil {
 		panic(err)
 	}
