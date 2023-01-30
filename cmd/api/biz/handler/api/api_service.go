@@ -13,9 +13,12 @@ import (
 	"mini_tiktok/cmd/api/biz/rpc"
 	userservice "mini_tiktok/kitex_gen/userservice"
 	"mini_tiktok/kitex_gen/videoservice"
+<<<<<<< HEAD
 	utils2 "mini_tiktok/pkg/utils"
 	"time"
 
+=======
+>>>>>>> lzx
 	"strconv"
 )
 
@@ -72,7 +75,6 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
 	registerResponse, err := rpc.UserRpcClient.Register(context.Background(), &userservice.DouyinUserRegisterRequest{
 		Username: username,
 		Password: password,
@@ -95,8 +97,18 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 // @router /douyin/user/login [POST]
 func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
+<<<<<<< HEAD
 	username := c.Query("username")
 	password := c.Query("password")
+=======
+	var req api.UserLoginReq
+	req.Username = c.Query("username")
+	req.Password = c.Query("password")
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+>>>>>>> lzx
 	hlog.Info("start call login rpc api")
 	hlog.Infof("name: %v, pass: %v", username, password)
 	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userservice.DouyinUserLoginRequest{
@@ -194,7 +206,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-// FavoriteAction .
+// FavoriteAction .点赞接口
 // @router /douyin/favorite/action [POST]
 func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	var err error
@@ -205,12 +217,30 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp := new(api.FavoriteActionResp)
+	videoId, _ := strconv.Atoi(req.VideoID)
+	actionType, _ := strconv.Atoi(req.ActionType)
+	r, err := rpc.VideoRpcClient.FavoriteAction(context.Background(), &videoservice.DouyinFavoriteActionRequest{
+		Token:      req.Token,
+		VideoId:    int64(videoId),
+		ActionType: int32(actionType),
+	})
+
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"code":    0,
+			"message": err.Error(),
+		})
+		return
+	}
+	resp := &api.FavoriteActionResp{
+		StatusCode:    0,
+		StatusMessage: r.StatusMsg,
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
 
-// FavoriteList .
+// FavoriteList
 // @router /douyin/favorite/list [GET]
 func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	var err error
@@ -220,9 +250,24 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+	userId, _ := strconv.Atoi(req.UserID)
+	r, err := rpc.VideoRpcClient.FavoriteList(context.Background(), &videoservice.DouyinFavoriteListRequest{
+		UserId: int64(userId),
+		Token:  req.Token,
+	})
+	if err != nil {
+		c.JSON(consts.StatusOK, utils.H{
+			"code":    0,
+			"message": err.Error(),
+		})
+		return
+	}
 
-	resp := new(api.FavoriteListResp)
-
+	resp := &videoservice.DouyinFavoriteListResponse{
+		StatusCode: 0,
+		StatusMsg:  "查询成功",
+		VideoList:  r.VideoList,
+	}
 	c.JSON(consts.StatusOK, resp)
 }
 

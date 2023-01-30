@@ -40,9 +40,11 @@ func Init() {
 		panic(err)
 	}
 
-	if err := db.Use(tracing.NewPlugin()); err != nil {
+	if err = db.Use(tracing.NewPlugin()); err != nil {
 		panic(err)
 	}
+
+	fmt.Println("数据库连接成功")
 	if db == nil {
 		log.Println("db is nil")
 	}
