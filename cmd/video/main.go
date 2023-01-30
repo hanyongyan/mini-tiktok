@@ -17,6 +17,7 @@ import (
 	"mini_tiktok/cmd/video/ftpUtil"
 	"mini_tiktok/cmd/video/rpc"
 	"mini_tiktok/kitex_gen/videoservice/videoservice"
+	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
@@ -25,7 +26,9 @@ import (
 )
 
 func Init() {
+	//task.Init()
 	config.Init()
+	cache.Init()
 	rpc.Init()
 	dal.Init()
 	ftpUtil.Init()
@@ -71,7 +74,11 @@ func main() {
 	Init()
 	svr := videoservice.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
+<<<<<<< HEAD
 		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
+=======
+		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
+>>>>>>> lzx
 		server.WithMiddleware(mw.CommonMiddleware),
 		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.VideoServiceName}),

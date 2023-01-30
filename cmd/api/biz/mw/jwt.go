@@ -15,6 +15,7 @@ func JwtMiddleware() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		//从请求头中获取token
 		tokenStr := c.Query("token") //从url参数获取
+		fmt.Println(tokenStr)
 		//用户不存在
 		if tokenStr == "" {
 			tokenStr = c.PostForm("token") //body获取
