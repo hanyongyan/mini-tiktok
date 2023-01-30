@@ -5,6 +5,9 @@ package api
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -15,8 +18,6 @@ import (
 	userservice "mini_tiktok/kitex_gen/userservice"
 	"mini_tiktok/kitex_gen/videoservice"
 	utils2 "mini_tiktok/pkg/utils"
-	"strconv"
-	"time"
 )
 
 // Feed .
@@ -239,7 +240,6 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 		VideoId:    int64(videoId),
 		ActionType: int32(actionType),
 	})
-
 	if err != nil {
 		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
@@ -359,7 +359,6 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		Token:   req.Token,
 		VideoId: int64(videoId),
 	})
-
 	if err != nil {
 		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
@@ -394,7 +393,6 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 		ToUserId:   toUserId,
 		ActionType: int32(actionType),
 	})
-
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMessage = err.Error()

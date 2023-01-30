@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"golang.org/x/crypto/scrypt"
 	"log"
+
+	"golang.org/x/crypto/scrypt"
+
 	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
 )

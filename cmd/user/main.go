@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -32,7 +33,6 @@ func Init() {
 }
 
 func main() {
-
 	provider.NewOpenTelemetryProvider(
 		provider.WithServiceName(consts.UserServiceName),
 		provider.WithExportEndpoint(consts.ExportEndpoint),

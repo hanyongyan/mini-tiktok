@@ -2,17 +2,15 @@ package ftpUtil
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/jlaffaye/ftp"
 	"mini_tiktok/pkg/configs/config"
-	"time"
 )
 
-var (
-	FtpClient *ftp.ServerConn
-)
+var FtpClient *ftp.ServerConn
 
 func Init() {
-
 	// 连接到 FTP 服务器
 	cfg := config.GlobalConfigs.FtpConfig
 	conn, err := ftp.Dial(

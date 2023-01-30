@@ -5,6 +5,7 @@ package Api
 import (
 	"context"
 	"fmt"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -33,7 +34,7 @@ func rootMw() []app.HandlerFunc {
 		// use gzip mw
 		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".jpg", ".mp4", ".png"})),
 		// use limiter mw
-		//limiter.AdaptiveLimit(limiter.WithCPUThreshold(900)),
+		// limiter.AdaptiveLimit(limiter.WithCPUThreshold(900)),
 		// use requestId mw & bind with traceId
 	}
 }

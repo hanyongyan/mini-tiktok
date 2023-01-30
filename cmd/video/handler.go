@@ -5,6 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
 	"github.com/nanakura/go-ramda"
@@ -17,8 +20,6 @@ import (
 	"mini_tiktok/pkg/dal/query"
 	"mini_tiktok/pkg/utils"
 	jwtutil "mini_tiktok/pkg/utils"
-	"strconv"
-	"time"
 )
 
 // VideoServiceImpl implements the last service interface defined in the IDL.
@@ -195,13 +196,13 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 		return nil, errors.New("token is expired")
 	}
 
-	//判断当前用户是否点赞
+	// 判断当前用户是否点赞
 	result, err := cache.RedisCache.RedisClient.SIsMember(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
 	if err != nil {
 		err = fmt.Errorf("redis访问失败")
 		return
 	}
-	//已点过赞，取消点赞
+	// 已点过赞，取消点赞
 	if result {
 		// redis数据库中删除关联
 		_, err1 := cache.RedisCache.RedisClient.SRem(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
@@ -269,19 +270,19 @@ func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.D
 	// 查询数据库得到喜欢列表
 	data, err := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId)).Find()
 	ids := make([]int64, 10)
-	//得到喜欢视频的所有id
+	// 得到喜欢视频的所有id
 	for _, fav := range data {
 		ids = append(ids, fav.VideoID)
 	}
 
-	//查询所有的喜欢视频信息
+	// 查询所有的喜欢视频信息
 	video := q.TVideo
 	find, err := q.WithContext(context.Background()).TVideo.Where(video.ID.In(ids...)).Find()
 	if err != nil {
 		err = fmt.Errorf("查询失败")
 	}
 	var videos []*videoservice.Video
-	//通过用用户id查询用户
+	// 通过用用户id查询用户
 	Tuser := q.TUser
 	for _, videosInfo := range find {
 		var vid videoservice.Video

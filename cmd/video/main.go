@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -22,13 +24,12 @@ import (
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
-	"net"
 )
 
 func Init() {
 	// 配置的初始化要放在最前面
-  config.Init()
-	//task.Init()
+	config.Init()
+	// task.Init()
 	cache.Init()
 	rpc.Init()
 	dal.Init()
@@ -36,6 +37,7 @@ func Init() {
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }
+
 func main() {
 	p := provider.NewOpenTelemetryProvider(
 		provider.WithServiceName(consts.VideoServiceName),
