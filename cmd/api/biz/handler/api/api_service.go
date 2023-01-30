@@ -27,7 +27,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	var req api.FeedReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, api.Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
 	}
 	var latestDate int64
@@ -43,9 +43,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	)
 	resp := new(api.FeedResp)
 	if err != nil {
-		resp.StatusCode = 1
-		resp.StatusMessage = fmt.Sprintf("获取视频失败：%v", err)
-		c.JSON(consts.StatusOK, resp)
+		c.JSON(consts.StatusOK, api.Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
 	}
 
@@ -69,8 +67,9 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 	password := c.Query("password")
 	hlog.Info("start call login rpc api")
 	hlog.Infof("name: %v, pass: %v", username, password)
+	resp := &api.UserRegisterResp{}
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 
@@ -79,10 +78,10 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		Password: password,
 	})
 	if err != nil {
-		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
-	resp := &api.UserRegisterResp{
+	resp = &api.UserRegisterResp{
 		StatusCode:    int64(registerResponse.StatusCode),
 		StatusMessage: registerResponse.StatusMsg,
 		UserID:        registerResponse.UserId,
@@ -107,13 +106,11 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 	hlog.Info("call login rpc api end")
 	if err != nil {
 		hlog.Error("error occur", err)
-		c.JSON(consts.StatusOK, utils.H{"code": 0, "message": err.Error()})
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	if loginResponse == nil {
-		c.JSON(consts.StatusOK, utils.H{
-			"status": "nil",
-		})
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	resp := &api.UserLoginResp{
@@ -133,8 +130,9 @@ func User(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req api.UserReq
 	err = c.BindAndValidate(&req)
+	resp := &api.UserResp{}
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 
@@ -142,13 +140,10 @@ func User(ctx context.Context, c *app.RequestContext) {
 	info, err := rpc.UserRpcClient.Info(context.Background(), &userservice.DouyinUserRequest{UserId: int64(userId), Token: req.Token})
 	if err != nil {
 		hlog.Infof("获取用户信息时error occur: %v", err)
-		c.JSON(consts.StatusOK, utils.H{
-			"code":    0,
-			"message": err.Error(),
-		})
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
-	resp := &api.UserResp{
+	resp = &api.UserResp{
 		StatusCode:    int64(info.StatusCode),
 		StatusMessage: info.StatusMsg,
 		User: &api.User{
@@ -170,7 +165,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	var req api.PublishActionReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	resp := new(api.PublishActionResp)
@@ -199,16 +194,14 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 	var req api.PublishListReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 
 	resp := new(api.PublishListResp)
 	userId, err := strconv.Atoi(req.UserID)
 	if err != nil {
-		resp.StatusCode = 1
-		resp.StatusMessage = err.Error()
-		c.JSON(consts.StatusOK, resp)
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	publishListResponse, err := rpc.VideoRpcClient.PublishList(context.Background(), &videoservice.DouyinPublishListRequest{
@@ -216,9 +209,7 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 		UserId: int64(userId),
 	})
 	if err != nil {
-		resp.StatusCode = 1
-		resp.StatusMessage = err.Error()
-		c.JSON(consts.StatusOK, resp)
+		c.JSON(consts.StatusOK, utils.H{"status_code": 1, "status_msg": err.Error()})
 		return
 	}
 	if resp.VideoList == nil {
