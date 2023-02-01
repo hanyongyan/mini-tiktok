@@ -53,13 +53,8 @@ func Register(_ context.Context, c *app.RequestContext) {
 }
 
 func Login(_ context.Context, c *app.RequestContext) {
-	var err error
 	username := c.Query("username")
 	password := c.Query("password")
-	if err != nil {
-		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
-		return
-	}
 	hlog.Info("start call login rpc api")
 	hlog.Infof("name: %v, pass: %v", username, password)
 	loginResponse, err := rpc.UserRpcClient.Login(context.Background(), &userservice.DouyinUserLoginRequest{

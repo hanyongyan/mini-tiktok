@@ -75,28 +75,24 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *userservice.DouyinU
 func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserRequest) (resp *userservice.DouyinUserResponse, err error) {
 	u := query.Q.TUser
 	userInfo, err := u.WithContext(context.Background()).Where(u.ID.Eq(req.UserId)).First()
-	if err != nil {
-		err = fmt.Errorf("查询失败: %w", err)
+	if userInfo == nil {
+		err = fmt.Errorf("查询失败, id为%v, error: %w", req.UserId, err)
 		return
 	}
 	userId := req.UserId
 	tfollow := query.Q.TFollow
 	claims, _ := jwtutil.CheckToken(req.Token)
 	toUserId := claims.UserId
-	klog.Infof("userid: %v touserId: %v")
-	findFollowRes, err := tfollow.WithContext(context.Background()).
+	klog.Infof("userid: %v, touserId: %v", userId, toUserId)
+	findFollowRes, _ := tfollow.WithContext(context.Background()).
 		Where(tfollow.UserID.Eq(userId), tfollow.FollowerID.Eq(toUserId)).
 		First()
-	if err != nil {
-		return
-	}
 	isFollow := false
 	if findFollowRes != nil {
 		isFollow = true
 	}
 	resp = &userservice.DouyinUserResponse{
 		StatusCode: 0,
-		StatusMsg:  "",
 		User: &userservice.User{
 			Id:            userInfo.ID,
 			Name:          userInfo.Name,

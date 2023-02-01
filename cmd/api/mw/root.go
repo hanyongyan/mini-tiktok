@@ -1,6 +1,7 @@
 package mw
 
 import (
+	"context"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
@@ -15,7 +16,7 @@ func rootMw() []app.HandlerFunc {
 	// your code...
 	return []app.HandlerFunc{
 		// client request logger
-		mw.RequestLogger(),
+		RequestLogger(),
 		// use recovery mw
 		recovery.Recovery(recovery.WithRecoveryHandler(
 			func(ctx context.Context, c *app.RequestContext, err interface{}, stack []byte) {
@@ -30,6 +31,5 @@ func rootMw() []app.HandlerFunc {
 		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".jpg", ".mp4", ".png"})),
 		// use limiter mw
 		// limiter.AdaptiveLimit(limiter.WithCPUThreshold(900)),
-		// use requestId mw & bind with traceId
 	}
 }
