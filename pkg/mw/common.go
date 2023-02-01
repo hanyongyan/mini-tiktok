@@ -2,8 +2,9 @@ package mw
 
 import (
 	"context"
+	"log"
+
 	"github.com/cloudwego/kitex/pkg/endpoint"
-	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 )
 
@@ -14,14 +15,14 @@ func CommonMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
 	return func(ctx context.Context, req, resp interface{}) (err error) {
 		ri := rpcinfo.GetRPCInfo(ctx)
 		// get real request
-		klog.Infof("real request: %+v\n", req)
+		log.Printf("real request: %+v\n", req)
 		// get remote service information
-		klog.Infof("remote service name: %s, remote method: %s\n", ri.To().ServiceName(), ri.To().Method())
+		log.Printf("remote service name: %s, remote method: %s\n", ri.To().ServiceName(), ri.To().Method())
 		if err = next(ctx, req, resp); err != nil {
 			return err
 		}
 		// get real response
-		klog.Infof("real response: %+v\n", resp)
+		log.Printf("real response: %+v\n", resp)
 		return nil
 	}
 }

@@ -27,6 +27,7 @@ import (
 )
 
 func Init() {
+	// 配置的初始化要放在最前面
 	config.Init()
 	cache.Init()
 	rpc.Init()
@@ -36,6 +37,7 @@ func Init() {
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }
+
 func main() {
 	p := provider.NewOpenTelemetryProvider(
 		provider.WithServiceName(consts.VideoServiceName),

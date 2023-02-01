@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"mini_tiktok/cmd/user/utils"
 	userservice "mini_tiktok/kitex_gen/userservice"
@@ -49,7 +50,8 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *userservice.DouyinU
 		err = fmt.Errorf("注册失败：用户已存在 %w", err)
 		return
 	}
-	newUser := &model.TUser{Name: req.Username, Password: req.Password}
+	pwd := utils.ScryptPwd(req.Password)
+	newUser := &model.TUser{Name: req.Username, Password: pwd}
 	err = q.WithContext(context.Background()).TUser.Create(newUser)
 	if err != nil {
 		err = fmt.Errorf("注册失败: %w", err)
@@ -73,28 +75,24 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *userservice.DouyinU
 func (s *UserServiceImpl) Info(ctx context.Context, req *userservice.DouyinUserRequest) (resp *userservice.DouyinUserResponse, err error) {
 	u := query.Q.TUser
 	userInfo, err := u.WithContext(context.Background()).Where(u.ID.Eq(req.UserId)).First()
-	if err != nil {
-		err = fmt.Errorf("查询失败: %w", err)
+	if userInfo == nil {
+		err = fmt.Errorf("查询失败, id为%v, error: %w", req.UserId, err)
 		return
 	}
 	userId := req.UserId
 	tfollow := query.Q.TFollow
 	claims, _ := jwtutil.CheckToken(req.Token)
 	toUserId := claims.UserId
-	klog.Infof("userid: %v touserId: %v")
-	findFollowRes, err := tfollow.WithContext(context.Background()).
+	klog.Infof("userid: %v, touserId: %v", userId, toUserId)
+	findFollowRes, _ := tfollow.WithContext(context.Background()).
 		Where(tfollow.UserID.Eq(userId), tfollow.FollowerID.Eq(toUserId)).
 		First()
-	if err != nil {
-		return
-	}
 	isFollow := false
 	if findFollowRes != nil {
 		isFollow = true
 	}
 	resp = &userservice.DouyinUserResponse{
 		StatusCode: 0,
-		StatusMsg:  "",
 		User: &userservice.User{
 			Id:            userInfo.ID,
 			Name:          userInfo.Name,
@@ -111,6 +109,7 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 	// 关注操作
 	queryFollow := query.Q.TFollow
 	queryFriend := query.Q.TFriend
+	queryUser := query.Q.TUser
 	resp = &userservice.DouyinRelationActionResponse{}
 
 	claims, flag := utils2.CheckToken(req.Token)
@@ -134,6 +133,11 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 				return nil, err
 			}
 			// 进行到此步说明 添加关注成功
+			// 登录用户的关注数 +1
+			_, _ = queryUser.WithContext(ctx).Where(queryUser.ID.Eq(claims.UserId)).Update(queryUser.FollowCount, queryUser.FollowCount.Add(1))
+			// 关注用户的粉丝数 +1
+			_, _ = queryUser.WithContext(ctx).Where(queryUser.ID.Eq(req.ToUserId)).Update(queryUser.FollowerCount, queryUser.FollowerCount.Add(1))
+			// 查看关注用户是否关注了自己
 			whetherToCare, _ := queryFollow.WithContext(ctx).Where(queryFollow.UserID.Eq(follow.FollowerID)).
 				Where(queryFollow.FollowerID.Eq(follow.UserID)).First()
 			// 所关注的用户关注了自己
@@ -142,6 +146,10 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 				_ = queryFriend.WithContext(ctx).Create(&model.TFriend{
 					UserID:   follow.UserID,
 					FriendID: follow.FollowerID,
+				})
+				_ = queryFriend.WithContext(ctx).Create(&model.TFriend{
+					UserID:   follow.FollowerID,
+					FriendID: follow.UserID,
 				})
 			}
 
@@ -170,14 +178,18 @@ func (s *UserServiceImpl) Action(ctx context.Context, req *userservice.DouyinRel
 		if err != nil {
 			return nil, err
 		}
+		// 登录用户的关注数 -1
+		_, _ = queryUser.WithContext(ctx).Where(queryUser.ID.Eq(claims.UserId)).Update(queryUser.FollowCount, queryUser.FollowCount.Sub(1))
+		// 关注用户的粉丝数 -1
+		_, _ = queryUser.WithContext(ctx).Where(queryUser.ID.Eq(req.ToUserId)).Update(queryUser.FollowerCount, queryUser.FollowerCount.Sub(1))
+
 		// 查看是否存好友关系，如果存在好友关系，将好友关系从数据库中进行删除
-		isFriend, _ := queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).
-			Or(queryFriend.FriendID.Eq(follow.UserID), queryFriend.UserID.Eq(follow.FollowerID)).Find()
+		isFriend, _ := queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).Find()
 		// 说明存在好友关系
 		if isFriend != nil {
 			// 进行删除好友关系
-			_, _ = queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).
-				Or(queryFriend.FriendID.Eq(follow.UserID), queryFriend.UserID.Eq(follow.FollowerID)).Delete()
+			_, _ = queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.FollowerID), queryFriend.UserID.Eq(follow.UserID)).Delete()
+			_, _ = queryFriend.WithContext(ctx).Where(queryFriend.FriendID.Eq(follow.UserID), queryFriend.UserID.Eq(follow.FollowerID)).Delete()
 		}
 		resp.StatusMsg = "取消关注成功"
 		resp.StatusCode = 0
@@ -193,7 +205,7 @@ func (s *UserServiceImpl) FollowList(ctx context.Context, req *userservice.Douyi
 	// 进行查询用户
 	queryUser := query.Q.TUser
 	// 返回的用户信息
-	//users := &[]model.TUser{}
+	// users := &[]model.TUser{}
 	// 只进行查询关注用户的 id
 	follows, err := queryFollow.WithContext(ctx).Select(queryFollow.FollowerID).Where(queryFollow.UserID.Eq(req.UserId)).Find()
 	if err != nil {
@@ -243,7 +255,7 @@ func (s *UserServiceImpl) FollowerList(ctx context.Context, req *userservice.Dou
 	for i, follower := range followers {
 		followersId[i] = follower.UserID
 	}
-	//进行查询粉丝用户信息
+	// 进行查询粉丝用户信息
 	t_users, err := queryUser.WithContext(ctx).Where(queryUser.ID.In(followersId...)).Find()
 	if err != nil {
 		return
@@ -268,8 +280,69 @@ func (s *UserServiceImpl) FollowerList(ctx context.Context, req *userservice.Dou
 	return
 }
 
-// FriendList implements the UserServiceImpl interface.
+// FriendList implements the UserServiceImpl interface. 好友列表
 func (s *UserServiceImpl) FriendList(ctx context.Context, req *userservice.DouyinRelationFriendListRequest) (resp *userservice.DouyinRelationFriendListResponse, err error) {
-	// TODO: Your code here...
-	return
+	resp = &userservice.DouyinRelationFriendListResponse{}
+	qFriend := query.Q.TFriend
+	qUser := query.Q.TUser
+	qFollow := query.Q.TFollow
+	// 查询 查看用户的好友
+	friendUsers, err := qFriend.WithContext(ctx).Select(qFriend.FriendID).Where(qFriend.UserID.Eq(req.UserId)).Find()
+	if err != nil {
+		if err.Error() == "record not found" {
+			resp.StatusCode = 0
+			resp.StatusMsg = "用户没有好友"
+			resp.UserList = nil
+			return resp, nil
+		}
+		return nil, err
+	}
+	userIds := make([]int64, len(friendUsers))
+	// 抽离出粉丝的用户 id
+	for i, user := range friendUsers {
+		userIds[i] = user.FriendID
+	}
+	// 对关注的用户进行查询
+	queryUsers, _ := qUser.WithContext(ctx).Where(qUser.ID.In(userIds...)).Find()
+	users := make([]userservice.User, len(queryUsers))
+	claims, _ := utils2.CheckToken(req.Token)
+	// 如果查看用户与当前登录用户是好友，不需要返回自身的数据
+	// 如果这个数大于 -1 ，说明登陆用户与查看用户是好友，将此数据进行剔除
+	whetherExistCurrentUser := -1
+	for i, queryUser := range queryUsers {
+
+		if queryUser.ID == claims.UserId {
+			whetherExistCurrentUser = i
+			continue
+		}
+		users[i].Id = queryUser.ID
+		users[i].Name = queryUser.Name
+		users[i].FollowerCount = queryUser.FollowerCount
+		users[i].FollowCount = queryUser.FollowCount
+	}
+	// 进行剔除登录用户的数据
+	if whetherExistCurrentUser >= 0 {
+		users = append(users[:whetherExistCurrentUser], users[whetherExistCurrentUser+1:]...)
+	}
+	// 如果查看的用户是自己，就不需要查询是否已经关注
+	if req.UserId == claims.UserId {
+		for i := 0; i < len(users); i++ {
+			users[i].IsFollow = true
+			resp.UserList = append(resp.UserList, &users[i])
+		}
+	} else {
+		for i := 0; i < len(users); i++ {
+			whetherToCare, err := qFollow.WithContext(ctx).
+				Where(qFollow.UserID.Eq(claims.UserId), qFollow.FollowerID.Eq(users[i].Id)).First()
+			if err == nil && whetherToCare != nil {
+				users[i].IsFollow = true
+			} else {
+				users[i].IsFollow = false
+			}
+			resp.UserList = append(resp.UserList, &users[i])
+		}
+	}
+	resp.StatusMsg = "查询成功"
+	resp.StatusCode = 0
+	return resp, nil
 }

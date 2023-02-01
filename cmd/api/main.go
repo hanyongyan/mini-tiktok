@@ -6,6 +6,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/common/tracer/stats"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	hertzlogrus "github.com/hertz-contrib/obs-opentelemetry/logging/logrus"
 	"github.com/hertz-contrib/obs-opentelemetry/tracing"
@@ -14,16 +15,17 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"mini_tiktok/cmd/api/biz/rpc"
+	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
 )
 
 func Init() {
+	// 配置初始化要放在最前面
 	config.Init()
 	rpc.Init()
 	hlog.SetLogger(hertzlogrus.NewLogger())
-	hlog.SetLevel(hlog.LevelInfo)
+	hlog.SetLevel(hlog.LevelDebug)
 }
 
 func main() {
@@ -56,6 +58,7 @@ func main() {
 	addr := "0.0.0.0:8080"
 	h := server.New(
 		server.WithHostPorts(addr),
+		server.WithTraceLevel(stats.LevelDetailed),
 		server.WithHandleMethodNotAllowed(true),
 		server.WithRegistry(r, &registry.Info{
 			ServiceName: consts.ApiServiceName,

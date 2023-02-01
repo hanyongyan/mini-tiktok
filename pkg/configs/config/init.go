@@ -2,15 +2,28 @@ package config
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
-	"github.com/spf13/viper"
+	"log"
 	"os"
+
+	"github.com/spf13/viper"
 )
 
 var GlobalConfigs GlobalConfig
 
+var ConfPath string
+
+func init() {
+	configDefaultPath := "../../pkg/configs/config/config.yaml"
+	configPath := flag.String("c", configDefaultPath, "配置文件路径")
+	flag.Parse()
+	ConfPath = *configPath
+	log.Println("use conf path: ", ConfPath)
+}
+
 func Init() {
-	configFile, err := os.ReadFile("pkg/configs/config/config.template.yaml")
+	configFile, err := os.ReadFile(ConfPath)
 	if err != nil {
 		panic(err)
 	}

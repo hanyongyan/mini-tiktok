@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -23,6 +24,7 @@ import (
 )
 
 func Init() {
+	// 配置的初始化要放在最前面
 	config.Init()
 	rpc.Init()
 	dal.Init()
@@ -31,7 +33,6 @@ func Init() {
 }
 
 func main() {
-
 	provider.NewOpenTelemetryProvider(
 		provider.WithServiceName(consts.UserServiceName),
 		provider.WithExportEndpoint(consts.ExportEndpoint),
@@ -64,6 +65,7 @@ func main() {
 	}
 
 	Init()
+
 	svr := userservice.NewServer(new(UserServiceImpl),
 		server.WithServiceAddr(utils.NewNetAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.UserServiceAddr))),
 		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
