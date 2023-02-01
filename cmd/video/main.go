@@ -22,16 +22,17 @@ import (
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
+	"mini_tiktok/pkg/task"
 	"net"
 )
 
 func Init() {
-	//task.Init()
 	config.Init()
 	cache.Init()
 	rpc.Init()
 	dal.Init()
 	ftpUtil.Init()
+	task.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }

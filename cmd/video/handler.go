@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/nanakura/go-ramda"
 	"mini_tiktok/cmd/video/ftpUtil"
+	favutil "mini_tiktok/cmd/video/utils"
 	videoservice "mini_tiktok/kitex_gen/videoservice"
 	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/configs/config"
@@ -183,11 +184,11 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *videoservice.Do
 	return
 }
 
-// FavoriteAction 2023-1-27 @Auth by 李卓轩 version 1.0
-// 赞操作
+// FavoriteAction 2023-1-27 @Auth by 李卓轩 version 2.0
+// 2.0 加入点赞总数统计
+// 1.0 赞操作
 // FavoriteAction implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice.DouyinFavoriteActionRequest) (resp *videoservice.DouyinFavoriteActionResponse, err error) {
-	fmt.Println("in 点赞" + strconv.FormatInt(req.VideoId, 10))
 	// 通过 token 解析出当前用户
 	claims, flag := jwtutil.CheckToken(req.Token)
 	// 说明 token 已经过期
@@ -195,8 +196,10 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 		return nil, errors.New("token is expired")
 	}
 
+	redis := cache.RedisCache.RedisClient
+
 	//判断当前用户是否点赞
-	result, err := cache.RedisCache.RedisClient.SIsMember(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
+	result, err := redis.SIsMember(context.Background(), "post_set"+":"+consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
 	if err != nil {
 		err = fmt.Errorf("redis访问失败")
 		return
@@ -204,11 +207,13 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 	//已点过赞，取消点赞
 	if result {
 		// redis数据库中删除关联
-		_, err1 := cache.RedisCache.RedisClient.SRem(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
+		_, err1 := redis.SRem(context.Background(), "post_set"+":"+consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
 		if err1 != nil {
 			err1 = fmt.Errorf("redis 取消点赞失败")
 			return
 		}
+		//将视频总点赞数减一
+		_ = favutil.LikeNumDel(req.VideoId)
 		resp = &videoservice.DouyinFavoriteActionResponse{
 			StatusCode: 0,
 			StatusMsg:  "已取消点赞",
@@ -224,11 +229,13 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 	// 查询为空
 	if first == nil {
 		// 将点赞存入redis
-		cache.RedisCache.RedisClient.SAdd(context.Background(), consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10), 0)
+		redis.SAdd(context.Background(), "post_set"+":"+consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10), 0)
 		resp = &videoservice.DouyinFavoriteActionResponse{
 			StatusCode: 0,
 			StatusMsg:  "已成功点赞",
 		}
+		//将视频总点赞数加一
+		_ = favutil.LikeNumAdd(req.VideoId)
 		return
 	}
 

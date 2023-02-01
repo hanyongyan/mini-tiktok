@@ -17,7 +17,7 @@ redis:
 ftp:
   host: localhost
   port: 21
-  username:
+  username: Anonymous
   password:
 
 static:
