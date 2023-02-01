@@ -15,7 +15,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"mini_tiktok/cmd/api/biz/rpc"
+	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
 )

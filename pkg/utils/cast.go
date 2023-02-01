@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/nanakura/go-ramda"
-	"mini_tiktok/cmd/api/biz/model/api"
+	"mini_tiktok/cmd/api/model/api"
 	"mini_tiktok/kitex_gen/videoservice"
 )
 
