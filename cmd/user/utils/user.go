@@ -14,7 +14,7 @@ import (
 
 func CheckUser(q *query.Query, username, password string) (res *model.TUser, err error) {
 	tuser := q.TUser
-	res, err = tuser.WithContext(context.Background()).
+	res, _ = tuser.WithContext(context.Background()).
 		Where(tuser.Name.Eq(username)).
 		First()
 	if res == nil {
