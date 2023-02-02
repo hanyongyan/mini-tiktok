@@ -259,8 +259,9 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 	return
 }
 
-// FavoriteList 2023-1-27 @Auth by 李卓轩 version 1.0
-// 喜欢列表
+// FavoriteList 2023-1-27 @Auth by 李卓轩 version 2.0
+// 1.0 喜欢列表 （仅访问数据库）
+// 2.0 将redis中的数据一起查
 // FavoriteList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.DouyinFavoriteListRequest) (resp *videoservice.DouyinFavoriteListResponse, err error) {
 	// TODO: Your code here...
@@ -280,6 +281,12 @@ func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.D
 	for _, fav := range data {
 		ids = append(ids, fav.VideoID)
 	}
+	// 拿出redis中的点赞视频id
+	vids, err := favutil.GetRedisVideoID(strconv.FormatInt(claims.UserId, 10))
+	if err != nil {
+		return nil, err
+	}
+	ids = append(ids, vids...)
 
 	// 查询所有的喜欢视频信息
 	video := q.TVideo
@@ -310,7 +317,7 @@ func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.D
 
 	resp = &videoservice.DouyinFavoriteListResponse{
 		StatusCode: 0,
-		StatusMsg:  "成功",
+		StatusMsg:  "查询成功",
 		VideoList:  videos,
 	}
 	return

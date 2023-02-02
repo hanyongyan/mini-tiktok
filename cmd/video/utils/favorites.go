@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"mini_tiktok/pkg/cache"
+	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal/query"
 	"strconv"
+	"strings"
 )
 
 // LikeNumAdd 将点赞数加一
@@ -51,4 +53,26 @@ func LikeNumDel(videoID int64) error {
 		return fmt.Errorf("redis 存储错误")
 	}
 	return nil
+}
+
+// GetRedisVideoID 通过用户id获取redis中点赞过的视频id
+func GetRedisVideoID(userID string) (vids []int64, err error) {
+	var redis = cache.RedisCache.RedisClient
+	set, err := redis.Keys(context.Background(), "post_set:*").Result()
+	arr := make([]int64, 10)
+	for _, vid := range set {
+		result, err1 := redis.SIsMember(context.Background(), vid, userID).Result()
+		if err1 != nil {
+			err1 = fmt.Errorf("redis error:" + err.Error())
+			return nil, err1
+		}
+
+		if result {
+			split := strings.Split(vid, consts.FavoriteActionPrefix)
+			atoi, _ := strconv.Atoi(split[len(split)-1])
+			arr = append(arr, int64(atoi))
+		}
+	}
+
+	return arr, nil
 }
