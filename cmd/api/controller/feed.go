@@ -3,6 +3,9 @@ package controller
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -10,8 +13,6 @@ import (
 	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/kitex_gen/videoservice"
 	utils2 "mini_tiktok/pkg/utils"
-	"strconv"
-	"time"
 )
 
 type FeedResponse struct {

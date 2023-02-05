@@ -6,7 +6,6 @@ import (
 )
 
 func register(r *server.Hertz) {
-
 	apiRouter := r.Group("/douyin")
 
 	// basic apis

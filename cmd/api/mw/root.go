@@ -3,6 +3,7 @@ package mw
 import (
 	"context"
 	"fmt"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/common/hlog"

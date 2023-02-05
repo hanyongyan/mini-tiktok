@@ -24,6 +24,7 @@ require (
 	github.com/kitex-contrib/registry-nacos v0.0.1
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/nanakura/go-ramda v0.0.5
+	github.com/sourcegraph/conc v0.2.0
 	github.com/spf13/viper v1.15.0
 	golang.org/x/crypto v0.0.0-20221005025214-4161e89ecf1b
 	google.golang.org/protobuf v1.28.1

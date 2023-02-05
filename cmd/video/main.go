@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -14,7 +16,8 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"mini_tiktok/cmd/video/ftpUtil"
+	"mini_tiktok/cmd/video/mw/ffmpeg"
+	"mini_tiktok/cmd/video/mw/ftp"
 	"mini_tiktok/cmd/video/rpc"
 	"mini_tiktok/kitex_gen/videoservice/videoservice"
 	"mini_tiktok/pkg/cache"
@@ -23,7 +26,6 @@ import (
 	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
 	"mini_tiktok/pkg/task"
-	"net"
 )
 
 func Init() {
@@ -32,7 +34,8 @@ func Init() {
 	cache.Init()
 	rpc.Init()
 	dal.Init()
-	ftpUtil.Init()
+	ftp.Init()
+	ffmpeg.Init()
 	task.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)

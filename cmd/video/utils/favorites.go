@@ -3,19 +3,20 @@ package utils
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal/query"
-	"strconv"
-	"strings"
 )
 
 // LikeNumAdd 将点赞数加一
 func LikeNumAdd(videoID int64) error {
-	var redis = cache.RedisCache.RedisClient
+	redis := cache.RedisCache.RedisClient
 	q := query.Q
 	favorite := q.TVideo
-	//查询对应的点赞数
+	// 查询对应的点赞数
 	val, err2 := redis.HGet(context.Background(), "videos", strconv.FormatInt(videoID, 10)).Result()
 	if err2 != nil {
 		video, err := q.WithContext(context.Background()).TVideo.Where(favorite.ID.Eq(videoID)).First()
@@ -35,7 +36,7 @@ func LikeNumAdd(videoID int64) error {
 
 // LikeNumDel 将点赞数减一
 func LikeNumDel(videoID int64) error {
-	var redis = cache.RedisCache.RedisClient
+	redis := cache.RedisCache.RedisClient
 	q := query.Q
 	favorite := q.TVideo
 	val, err2 := redis.HGet(context.Background(), "videos", strconv.FormatInt(videoID, 10)).Result()
@@ -57,7 +58,7 @@ func LikeNumDel(videoID int64) error {
 
 // GetRedisVideoID 通过用户id获取redis中点赞过的视频id
 func GetRedisVideoID(userID string) (vids []int64, err error) {
-	var redis = cache.RedisCache.RedisClient
+	redis := cache.RedisCache.RedisClient
 	set, err := redis.Keys(context.Background(), "post_set:*").Result()
 	arr := make([]int64, 10)
 	for _, vid := range set {

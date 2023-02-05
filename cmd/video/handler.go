@@ -5,13 +5,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
+
+	"mini_tiktok/cmd/video/mw/ffmpeg"
+	"mini_tiktok/cmd/video/mw/ftp"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
 	"github.com/nanakura/go-ramda"
-	"mini_tiktok/cmd/video/ftpUtil"
+	"github.com/sourcegraph/conc"
 	favutil "mini_tiktok/cmd/video/utils"
 	videoservice "mini_tiktok/kitex_gen/videoservice"
 	"mini_tiktok/pkg/cache"
@@ -30,16 +34,50 @@ type VideoServiceImpl struct{}
 func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *videoservice.DouyinPublishActionRequest) (resp *videoservice.DouyinPublishActionResponse, err error) {
 	data := bytes.NewBufferString(string(req.Data))
 	uuidv4, _ := uuid.NewUUID()
-	path := fmt.Sprintf("%s.mp4", uuidv4.String())
+	uuidname := uuidv4.String()
+	path := fmt.Sprintf("%s.mp4", uuidname)
 	tv := query.Q.TVideo
 	cliams, _ := utils.CheckToken(req.Token)
 	userId := cliams.UserId
-	playUrl := fmt.Sprintf("%s/%s", config.GlobalConfigs.StaticConfig.Url, path)
+	conf := config.GlobalConfigs.StaticConfig
+	playUrl := fmt.Sprintf("%s/%s", conf.Url, path)
+
+	var wg conc.WaitGroup
+	// 获取视频封面并上传封面
+	wg.Go(func() {
+		// 视频写入本地临时文件夹
+		var file *os.File
+		file, err = os.Create(fmt.Sprintf("%s/%s.mp4", conf.TmpPath, uuidname))
+		if err != nil {
+			return
+		}
+		defer file.Close()
+		_, err = file.Write(req.Data)
+		if err != nil {
+			return
+		}
+		// 向队列中添加消息
+		ffmpeg.PushTask(uuidname)
+	})
+
+	// 上传视频
+	wg.Go(func() {
+		if err = ftp.FtpClient.Stor(path, data); err != nil {
+			klog.Error("Error uploading file:", err)
+			err = fmt.Errorf("视频保存失败：%w", err)
+		}
+	})
+	wg.Wait()
+	if err != nil {
+		return
+	}
+
+	// 将元数据存入数据库
 	err = tv.WithContext(context.Background()).
 		Create(&model.TVideo{
 			AuthorID:      userId,
 			PlayURL:       playUrl,
-			CoverURL:      "https://cdn.pixabay.com/photo/2016/03/27/18/10/bear-1283347_1280.jpg",
+			CoverURL:      fmt.Sprintf("%s/img/%s.jpg", conf.Url, uuidname),
 			FavoriteCount: 0,
 			CommentCount:  0,
 			IsFavorite:    false,
@@ -47,11 +85,6 @@ func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *videoservice.
 			CreateDate:    time.Now(),
 		})
 	if err != nil {
-		klog.Error("Error uploading file:", err)
-		err = fmt.Errorf("视频保存失败：%w", err)
-		return
-	}
-	if err = ftpUtil.FtpClient.Stor(path, data); err != nil {
 		klog.Error("Error uploading file:", err)
 		err = fmt.Errorf("视频保存失败：%w", err)
 		return
@@ -198,7 +231,7 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 	}
 
 	redis := cache.RedisCache.RedisClient
-	//判断当前用户是否点赞
+	// 判断当前用户是否点赞
 	result, err := redis.SIsMember(context.Background(), "post_set"+":"+consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
 	if err != nil {
 		err = fmt.Errorf("redis访问失败")
@@ -212,7 +245,7 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 			err1 = fmt.Errorf("redis 取消点赞失败")
 			return
 		}
-		//将视频总点赞数减一
+		// 将视频总点赞数减一
 		_ = favutil.LikeNumDel(req.VideoId)
 		resp = &videoservice.DouyinFavoriteActionResponse{
 			StatusCode: 0,
@@ -234,7 +267,7 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 			StatusCode: 0,
 			StatusMsg:  "已成功点赞",
 		}
-		//将视频总点赞数加一
+		// 将视频总点赞数加一
 		_ = favutil.LikeNumAdd(req.VideoId)
 		return
 	}
