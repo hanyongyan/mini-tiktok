@@ -24,5 +24,6 @@ type GlobalConfig struct {
 	} `mapstructure:"ftp"`
 	StaticConfig struct {
 		Url string
+		TmpPath string `mapstructure:"local_tmp_path"`
 	} `mapstructure:"static"`
 }

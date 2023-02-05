@@ -22,3 +22,4 @@ ftp:
 
 static:
   url: localhost:8080
+  local_tmp_path: /tmp/static
