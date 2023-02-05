@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -11,7 +13,6 @@ import (
 	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/kitex_gen/videoservice"
 	utils2 "mini_tiktok/pkg/utils"
-	"strconv"
 )
 
 type VideoListResponse struct {

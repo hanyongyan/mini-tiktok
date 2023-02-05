@@ -3,8 +3,9 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/cloudwego/hertz/pkg/app"
 	"net/http"
+
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 type ChatResponse struct {
@@ -14,7 +15,6 @@ type ChatResponse struct {
 
 // MessageAction no practical effect, just check if token is valid
 func MessageAction(_ context.Context, c *app.RequestContext) {
-
 	c.JSON(http.StatusOK, Response{StatusCode: 0})
 }
 

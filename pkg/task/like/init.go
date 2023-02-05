@@ -3,14 +3,15 @@ package like
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/go-co-op/gocron"
 	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func Init() {
@@ -36,7 +37,7 @@ func RedisLikeDateToMysql() {
 		err = fmt.Errorf("redis获取所有数据失败" + err.Error())
 	}
 
-	//根据视频id更新点赞数量
+	// 根据视频id更新点赞数量
 	for k, v := range result {
 		split := strings.Split(k, consts.FavoriteActionPrefix)
 		vid, _ := strconv.Atoi(split[len(split)-1])
@@ -44,14 +45,14 @@ func RedisLikeDateToMysql() {
 		redisVideoLikeNumToMysql(int64(vid), int64(count))
 	}
 
-	//清空redis数据
+	// 清空redis数据
 	strs, err := redis.HKeys(context.Background(), "videos").Result()
 	for _, k := range strs {
 		redis.HDel(context.Background(), "videos", k)
 	}
 
 	// 将点赞数据批量存进数据库
-	//获取post_set中的所有键
+	// 获取post_set中的所有键
 	set, err := redis.Keys(context.Background(), "post_set:*").Result()
 	for _, str := range set {
 		userIds := redis.SMembers(context.Background(), "post_set:"+str).Val()
@@ -63,7 +64,6 @@ func RedisLikeDateToMysql() {
 		}
 
 	}
-
 }
 
 // 将点赞数与videoid刷回数据库

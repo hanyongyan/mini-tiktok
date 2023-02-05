@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -9,7 +11,6 @@ import (
 	"mini_tiktok/cmd/api/model/api"
 	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/kitex_gen/userservice"
-	"strconv"
 )
 
 type UserLoginResponse struct {

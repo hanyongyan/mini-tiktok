@@ -13,5 +13,6 @@ const (
 	ExportEndpoint       = ":4317"
 	SecretKey            = "21xby87!*&B**!N@*N!N1N@#^!T@!N@!T@ET1be12N@)"
 	IdentityKey          = "id"
+	MaxMsgCount          = 100
 	FavoriteActionPrefix = "FavoriteAction_"
 )

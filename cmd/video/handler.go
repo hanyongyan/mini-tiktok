@@ -5,11 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mini_tiktok/cmd/video/mw/ffmpeg"
-	"mini_tiktok/cmd/video/mw/ftp"
 	"os"
 	"strconv"
 	"time"
+
+	"mini_tiktok/cmd/video/mw/ffmpeg"
+	"mini_tiktok/cmd/video/mw/ftp"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
@@ -55,10 +56,8 @@ func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *videoservice.
 		if err != nil {
 			return
 		}
-		//向队列中添加消息
-		ffmpeg.Ffchan <- ffmpeg.Ffmsg{
-			Filename: uuidname,
-		}
+		// 向队列中添加消息
+		ffmpeg.PushTask(uuidname)
 	})
 
 	// 上传视频
@@ -75,16 +74,16 @@ func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *videoservice.
 
 	// 将元数据存入数据库
 	err = tv.WithContext(context.Background()).
-			Create(&model.TVideo{
-				AuthorID:      userId,
-				PlayURL:       playUrl,
-				CoverURL:      fmt.Sprintf("%s/img/%s.jpg", conf.Url, uuidname),
-				FavoriteCount: 0,
-				CommentCount:  0,
-				IsFavorite:    false,
-				Title:         req.Title,
-				CreateDate:    time.Now(),
-			})
+		Create(&model.TVideo{
+			AuthorID:      userId,
+			PlayURL:       playUrl,
+			CoverURL:      fmt.Sprintf("%s/img/%s.jpg", conf.Url, uuidname),
+			FavoriteCount: 0,
+			CommentCount:  0,
+			IsFavorite:    false,
+			Title:         req.Title,
+			CreateDate:    time.Now(),
+		})
 	if err != nil {
 		klog.Error("Error uploading file:", err)
 		err = fmt.Errorf("视频保存失败：%w", err)
@@ -139,13 +138,13 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 	var resList []queryVideoListRes
 	if latestTime == 0 {
 		err = tv.WithContext(context.Background()).
-				Select(
-					tv.ID,
-					tv.AuthorID,
-					tu.ALL,
-					tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
-					tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
-				).
+			Select(
+				tv.ID,
+				tv.AuthorID,
+				tu.ALL,
+				tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
+				tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
+			).
 			LeftJoin(tu, tu.ID.EqCol(tv.AuthorID)).
 			Order(tv.CreateDate.Desc()).
 			Limit(10).Scan(&resList)
@@ -156,16 +155,16 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 	} else {
 		t := time.Unix(latestTime/1000, 0)
 		err = tv.WithContext(context.Background()).
-				Select(
-					tv.ID,
-					tv.AuthorID,
-					tu.Name,
-					tu.Password,
-					tu.FollowCount,
-					tu.FollowerCount,
-					tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
-					tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
-				).
+			Select(
+				tv.ID,
+				tv.AuthorID,
+				tu.Name,
+				tu.Password,
+				tu.FollowCount,
+				tu.FollowerCount,
+				tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
+				tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
+			).
 			LeftJoin(tu, tu.ID.EqCol(tv.AuthorID)).
 			Where(tv.CreateDate.Lt(t)).
 			Order(tv.CreateDate.Desc()).
@@ -194,16 +193,16 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *videoservice.Do
 	var resList []queryVideoListRes
 	qCtx := context.Background()
 	err = tv.WithContext(qCtx).
-			Select(
-				tv.ID,
-				tv.AuthorID,
-				tu2.Name,
-				tu2.Password,
-				tu2.FollowCount,
-				tu2.FollowerCount,
-				tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
-				tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
-			).
+		Select(
+			tv.ID,
+			tv.AuthorID,
+			tu2.Name,
+			tu2.Password,
+			tu2.FollowCount,
+			tu2.FollowerCount,
+			tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
+			tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
+		).
 		LeftJoin(tu.WithContext(qCtx).Select(tu.ALL).Where(tu.ID.Eq(userId)).As("tu2"), tu2.ID.EqCol(tv.AuthorID)).
 		Order(tv.CreateDate.Desc()).
 		Limit(10).
@@ -232,7 +231,7 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 	}
 
 	redis := cache.RedisCache.RedisClient
-	//判断当前用户是否点赞
+	// 判断当前用户是否点赞
 	result, err := redis.SIsMember(context.Background(), "post_set"+":"+consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
 	if err != nil {
 		err = fmt.Errorf("redis访问失败")
@@ -246,7 +245,7 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 			err1 = fmt.Errorf("redis 取消点赞失败")
 			return
 		}
-		//将视频总点赞数减一
+		// 将视频总点赞数减一
 		_ = favutil.LikeNumDel(req.VideoId)
 		resp = &videoservice.DouyinFavoriteActionResponse{
 			StatusCode: 0,
@@ -268,7 +267,7 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 			StatusCode: 0,
 			StatusMsg:  "已成功点赞",
 		}
-		//将视频总点赞数加一
+		// 将视频总点赞数加一
 		_ = favutil.LikeNumAdd(req.VideoId)
 		return
 	}

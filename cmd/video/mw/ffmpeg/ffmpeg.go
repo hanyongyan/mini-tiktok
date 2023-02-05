@@ -4,25 +4,32 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"mini_tiktok/cmd/video/mw/ftp"
-	"mini_tiktok/pkg/configs/config"
 	"os"
 	"os/exec"
+
+	"mini_tiktok/cmd/video/mw/ftp"
+	"mini_tiktok/pkg/configs/config"
 )
 
 type Ffmsg struct {
 	Filename string
 }
 
-var Ffchan chan Ffmsg
+var ffchan chan Ffmsg
+
+func PushTask(filename string) {
+	ffchan <- Ffmsg{
+		Filename: filename,
+	}
+}
 
 // 通过增加协程，将获取的信息进行派遣，当信息处理失败之后，还会将处理方式放入通道形成的队列中
 func dispatcher() {
-	for ffmsg := range Ffchan {
+	for ffmsg := range ffchan {
 		go func(f Ffmsg) {
-			err := Ffmpeg(f.Filename, config.GlobalConfigs.StaticConfig.TmpPath)
+			err := ffmpegHandler(f.Filename, config.GlobalConfigs.StaticConfig.TmpPath)
 			if err != nil {
-				Ffchan <- f
+				ffchan <- f
 				log.Fatal("派遣失败：重新派遣")
 			}
 			log.Printf("视频%v.mp4截图处理成功", f.Filename)
@@ -41,8 +48,8 @@ func dispatcher() {
 	}
 }
 
-// Ffmpeg 通过远程调用ffmpeg命令来创建视频截图
-func Ffmpeg(filename, filepath string) error {
+// ffmpegHandler 通过远程调用ffmpeg命令来创建视频截图
+func ffmpegHandler(filename, filepath string) error {
 	cmd := exec.Command("ffmpeg",
 		"-ss", "00:00:01",
 		"-i", fmt.Sprintf("%s/%s.mp4", filepath, filename),

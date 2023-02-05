@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -24,7 +26,6 @@ import (
 	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
 	"mini_tiktok/pkg/task"
-	"net"
 )
 
 func Init() {
