@@ -4,14 +4,14 @@
  Source Server         : coco数据库
  Source Server Type    : MySQL
  Source Server Version : 50736
- Source Host           : 
+ Source Host           : localhost:3306
  Source Schema         : mini_tiktok
 
  Target Server Type    : MySQL
  Target Server Version : 50736
  File Encoding         : 65001
 
- Date: 28/01/2023 21:53:24
+ Date: 10/02/2023 19:14:54
 */
 
 SET NAMES utf8mb4;
@@ -28,7 +28,7 @@ CREATE TABLE `t_comment`  (
   `create_date` datetime NOT NULL COMMENT '评论发布日期，格式为mm-dd',
   `video_id` int(10) UNSIGNED NOT NULL COMMENT '视频id',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for t_favorite
@@ -51,7 +51,7 @@ CREATE TABLE `t_follow`  (
   `user_id` int(11) NOT NULL COMMENT '用户id',
   `follower_id` int(11) NOT NULL COMMENT '关注者id',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for t_friend
@@ -75,7 +75,7 @@ CREATE TABLE `t_user`  (
   `follower_count` int(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT '粉丝数',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for t_video
@@ -90,6 +90,7 @@ CREATE TABLE `t_video`  (
   `comment_count` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '评论数',
   `is_favorite` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已点赞(0为未点赞, 1为已点赞)',
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '视频标题',
+  `create_date` datetime NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '视频上传时间',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
