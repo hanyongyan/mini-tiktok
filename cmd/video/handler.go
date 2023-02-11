@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"mini_tiktok/cmd/video/mw/ffmpeg"
@@ -18,9 +17,7 @@ import (
 	"github.com/sourcegraph/conc"
 	favutil "mini_tiktok/cmd/video/utils"
 	videoservice "mini_tiktok/kitex_gen/videoservice"
-	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/configs/config"
-	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
 	"mini_tiktok/pkg/utils"
@@ -131,7 +128,9 @@ func CastQueryVideoListtoVideoServiceVideo(from []queryVideoListRes) []*videoser
 
 // Feed implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFeedRequest) (resp *videoservice.DouyinFeedResponse, err error) {
-	latestTime := req.LatestTime
+	//latestTime := req.LatestTime
+	var latestTime int64
+	latestTime = 0
 	// 值为0（默认值）则说明不限制最新时间
 	tv := query.Q.TVideo.As("v")
 	tu := query.Q.TUser.As("u")
@@ -218,7 +217,8 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *videoservice.Do
 	return
 }
 
-// FavoriteAction 2023-1-27 @Auth by 李卓轩 version 2.0
+// FavoriteAction 2023-1-27 @Auth by 李卓轩 version 3.0
+// 3.0 去除redis  bug: 数据不一致
 // 2.0 加入点赞总数统计
 // 1.0 赞操作
 // FavoriteAction implements the VideoServiceImpl interface.
@@ -229,40 +229,18 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 	if !flag {
 		return nil, errors.New("token is expired")
 	}
-
-	redis := cache.RedisCache.RedisClient
-	// 判断当前用户是否点赞
-	result, err := redis.SIsMember(context.Background(), "post_set"+":"+consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
-	if err != nil {
-		err = fmt.Errorf("redis访问失败")
-		return
-	}
-	// 已点过赞，取消点赞
-	if result {
-		// redis数据库中删除关联
-		_, err1 := redis.SRem(context.Background(), "post_set"+":"+consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10)).Result()
-		if err1 != nil {
-			err1 = fmt.Errorf("redis 取消点赞失败")
-			return
-		}
-		// 将视频总点赞数减一
-		_ = favutil.LikeNumDel(req.VideoId)
-		resp = &videoservice.DouyinFavoriteActionResponse{
-			StatusCode: 0,
-			StatusMsg:  "已取消点赞",
-		}
-		return
-	}
-
 	// 在数据库中查询点赞信息
 	q := query.Q
 	favorite := q.TFavorite
-	first, _ := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId), favorite.VideoID.Eq(req.VideoId)).First()
-
+	first, err := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId), favorite.VideoID.Eq(req.VideoId)).First()
 	// 查询为空
-	if first == nil {
-		// 将点赞存入redis
-		redis.SAdd(context.Background(), "post_set"+":"+consts.FavoriteActionPrefix+strconv.FormatInt(req.VideoId, 10), strconv.FormatInt(claims.UserId, 10), 0)
+	if err != nil {
+		newFav := &model.TFavorite{
+			VideoID: req.VideoId,
+			UserID:  claims.UserId,
+			Status:  true,
+		}
+		_ = q.WithContext(context.Background()).TFavorite.Create(newFav)
 		resp = &videoservice.DouyinFavoriteActionResponse{
 			StatusCode: 0,
 			StatusMsg:  "已成功点赞",
@@ -274,7 +252,7 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 
 	// 查询数据库，数据库为已点赞，取消点赞
 	if first.Status {
-		_, err1 := q.WithContext(context.Background()).TFavorite.Update(favorite.Status, false)
+		_, err1 := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId), favorite.VideoID.Eq(req.VideoId)).Update(favorite.Status, false)
 		if err1 != nil {
 			err1 = fmt.Errorf("更新数据库失败")
 		}
@@ -282,14 +260,23 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 			StatusCode: 0,
 			StatusMsg:  "已取消点赞",
 		}
+		// 将视频总点赞数减一
+		_ = favutil.LikeNumDel(req.VideoId)
+		return
+	} else {
+		_, err1 := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId), favorite.VideoID.Eq(req.VideoId)).Update(favorite.Status, true)
+		if err1 != nil {
+			err1 = fmt.Errorf("更新数据库失败")
+		}
+		resp = &videoservice.DouyinFavoriteActionResponse{
+			StatusCode: 0,
+			StatusMsg:  "已成功点赞",
+		}
+		// 将视频总点赞数减一
+		_ = favutil.LikeNumAdd(req.VideoId)
 		return
 	}
 
-	resp = &videoservice.DouyinFavoriteActionResponse{
-		StatusCode: 0,
-		StatusMsg:  "已成功点赞",
-	}
-	return
 }
 
 // FavoriteList 2023-1-27 @Auth by 李卓轩 version 2.0
@@ -314,13 +301,9 @@ func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.D
 	for _, fav := range data {
 		ids = append(ids, fav.VideoID)
 	}
-	// 拿出redis中的点赞视频id
-	vids, err := favutil.GetRedisVideoID(strconv.FormatInt(claims.UserId, 10))
 	if err != nil {
 		return nil, err
 	}
-	ids = append(ids, vids...)
-
 	// 查询所有的喜欢视频信息
 	video := q.TVideo
 	find, err := q.WithContext(context.Background()).TVideo.Where(video.ID.In(ids...)).Find()

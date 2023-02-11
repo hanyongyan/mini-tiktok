@@ -25,7 +25,6 @@ import (
 	"mini_tiktok/pkg/consts"
 	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
-	"mini_tiktok/pkg/task"
 )
 
 func Init() {
@@ -36,7 +35,7 @@ func Init() {
 	dal.Init()
 	ftp.Init()
 	ffmpeg.Init()
-	task.Init()
+	//task.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }
