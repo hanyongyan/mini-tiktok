@@ -1,21 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	mapset "github.com/deckarep/golang-set/v2"
-	"os"
+	"mini_tiktok/cmd/video/mw/cos"
 	"time"
-
-	"mini_tiktok/cmd/video/mw/ffmpeg"
-	"mini_tiktok/cmd/video/mw/ftp"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
 	"github.com/nanakura/go-ramda"
-	"github.com/sourcegraph/conc"
 	favutil "mini_tiktok/cmd/video/utils"
 	videoservice "mini_tiktok/kitex_gen/videoservice"
 	"mini_tiktok/pkg/configs/config"
@@ -30,64 +25,37 @@ type VideoServiceImpl struct{}
 
 // PublishAction implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *videoservice.DouyinPublishActionRequest) (resp *videoservice.DouyinPublishActionResponse, err error) {
-	data := bytes.NewBufferString(string(req.Data))
+	resp = &videoservice.DouyinPublishActionResponse{}
+	l := len(req.Data)
+	klog.Infof("视频长度：%d", l)
 	uuidv4, _ := uuid.NewUUID()
 	uuidname := uuidv4.String()
 	path := fmt.Sprintf("%s.mp4", uuidname)
 	tv := query.Q.TVideo
 	cliams, _ := utils.CheckToken(req.Token)
 	userId := cliams.UserId
-	conf := config.GlobalConfigs.StaticConfig
-	playUrl := fmt.Sprintf("%s/%s", conf.Url, path)
-
-	var wg conc.WaitGroup
-	// 获取视频封面并上传封面
-	wg.Go(func() {
-		// 视频写入本地临时文件夹
-		var file *os.File
-		file, err = os.Create(fmt.Sprintf("%s/%s.mp4", conf.TmpPath, uuidname))
-		if err != nil {
-			return
-		}
-		defer file.Close()
-		_, err = file.Write(req.Data)
-		if err != nil {
-			return
-		}
-		// 向队列中添加消息
-		ffmpeg.PushTask(uuidname)
-	})
-
-	// 上传视频
-	wg.Go(func() {
-		if err = ftp.FtpClient.Stor(path, data); err != nil {
-			klog.Error("Error uploading file:", err)
-			err = fmt.Errorf("视频保存失败：%w", err)
-		}
-	})
-	wg.Wait()
+	videoPath, photoPath, err := cos.SaveUploadedFile(ctx, req.Data, path)
 	if err != nil {
 		return
 	}
-
 	// 将元数据存入数据库
+	url := config.GlobalConfigs.CosConfig.Url
 	err = tv.WithContext(context.Background()).
-		Create(&model.TVideo{
-			AuthorID:      userId,
-			PlayURL:       playUrl,
-			CoverURL:      fmt.Sprintf("%s/img/%s.jpg", conf.Url, uuidname),
-			FavoriteCount: 0,
-			CommentCount:  0,
-			IsFavorite:    false,
-			Title:         req.Title,
-			CreateDate:    time.Now(),
-		})
+			Create(&model.TVideo{
+				AuthorID:      userId,
+				PlayURL:       fmt.Sprintf("%s%s", url, videoPath),
+				CoverURL:      fmt.Sprintf("%s%s", url, photoPath),
+				FavoriteCount: 0,
+				CommentCount:  0,
+				IsFavorite:    false,
+				Title:         req.Title,
+				CreateDate:    time.Now(),
+			})
 	if err != nil {
 		klog.Error("Error uploading file:", err)
 		err = fmt.Errorf("视频保存失败：%w", err)
 		return
 	}
-
 	return
 }
 
@@ -136,8 +104,6 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 		claims, flag := jwtutil.CheckToken(req.Token)
 		if flag {
 			userId = claims.UserId
-		} else {
-			return nil, errors.New("token is expired")
 		}
 	}
 
@@ -148,13 +114,13 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 	var resList []queryVideoListRes
 	if latestTime == 0 {
 		query := tv.WithContext(context.Background()).
-			Select(
-				tv.ID,
-				tv.AuthorID,
-				tu.ALL,
-				tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
-				tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
-			).
+				Select(
+					tv.ID,
+					tv.AuthorID,
+					tu.ALL,
+					tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
+					tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
+				).
 			LeftJoin(tu, tu.ID.EqCol(tv.AuthorID)).
 			Order(tv.CreateDate.Desc()).
 			Limit(10)
@@ -180,16 +146,16 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 	} else {
 		t := time.Unix(latestTime/1000, 0)
 		query := tv.WithContext(context.Background()).
-			Select(
-				tv.ID,
-				tv.AuthorID,
-				tu.Name,
-				tu.Password,
-				tu.FollowCount,
-				tu.FollowerCount,
-				tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
-				tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
-			).
+				Select(
+					tv.ID,
+					tv.AuthorID,
+					tu.Name,
+					tu.Password,
+					tu.FollowCount,
+					tu.FollowerCount,
+					tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
+					tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
+				).
 			LeftJoin(tu, tu.ID.EqCol(tv.AuthorID)).
 			Where(tv.CreateDate.Lt(t)).
 			Order(tv.CreateDate.Desc()).
@@ -234,16 +200,16 @@ func (s *VideoServiceImpl) PublishList(ctx context.Context, req *videoservice.Do
 	var resList []queryVideoListRes
 	qCtx := context.Background()
 	err = tv.WithContext(qCtx).
-		Select(
-			tv.ID,
-			tv.AuthorID,
-			tu2.Name,
-			tu2.Password,
-			tu2.FollowCount,
-			tu2.FollowerCount,
-			tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
-			tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
-		).
+			Select(
+				tv.ID,
+				tv.AuthorID,
+				tu2.Name,
+				tu2.Password,
+				tu2.FollowCount,
+				tu2.FollowerCount,
+				tv.PlayURL, tv.CoverURL, tv.FavoriteCount,
+				tv.CommentCount, tv.IsFavorite, tv.Title, tv.CreateDate,
+			).
 		LeftJoin(tu.WithContext(qCtx).Select(tu.ALL).Where(tu.ID.Eq(userId)).As("tu2"), tu2.ID.EqCol(tv.AuthorID)).
 		Order(tv.CreateDate.Desc()).
 		Limit(10).

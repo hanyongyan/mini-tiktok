@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"mini_tiktok/cmd/video/mw/cos"
 	"net"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -16,8 +17,6 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"mini_tiktok/cmd/video/mw/ffmpeg"
-	"mini_tiktok/cmd/video/mw/ftp"
 	"mini_tiktok/cmd/video/rpc"
 	"mini_tiktok/kitex_gen/videoservice/videoservice"
 	"mini_tiktok/pkg/cache"
@@ -33,8 +32,7 @@ func Init() {
 	cache.Init()
 	rpc.Init()
 	dal.Init()
-	ftp.Init()
-	ffmpeg.Init()
+	cos.Init()
 	//task.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
@@ -80,7 +78,7 @@ func main() {
 	svr := videoservice.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
-		server.WithMiddleware(mw.CommonMiddleware),
+		//server.WithMiddleware(mw.CommonMiddleware),
 		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.VideoServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),

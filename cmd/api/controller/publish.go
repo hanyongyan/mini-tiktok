@@ -3,12 +3,13 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"net/http"
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"github.com/nanakura/go-ramda"
 	"mini_tiktok/cmd/api/model/api"
 	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/kitex_gen/videoservice"
@@ -23,28 +24,40 @@ type VideoListResponse struct {
 // Publish check token then save upload file to public directory
 func Publish(_ context.Context, c *app.RequestContext) {
 	var err error
-	var req api.PublishActionReq
-	err = c.BindAndValidate(&req)
-	if err != nil {
-		c.JSON(consts.StatusBadRequest, utils.H{"status_code": 1, "status_msg": err.Error()})
+	title := c.FormValue("title")
+	token := c.FormValue("token")
+	f, _ := c.FormFile("data")
+	data := make([]byte, f.Size)
+	fd, _ := f.Open()
+	fd.Read(data)
+	fd.Close()
+	if len(title) == 0 {
+		c.JSON(http.StatusBadRequest, Response{StatusCode: 1, StatusMsg: "标题不能为空"})
 		return
 	}
+
+	hlog.Info("视频标题", string(title))
+
+	hlog.Info("query", len(data))
+	if len(data) == 0 {
+		c.JSON(consts.StatusBadRequest, Response{StatusCode: 1, StatusMsg: "视频不能为空"})
+		return
+	}
+
 	resp := new(api.PublishActionResp)
-	actionResponse, err := rpc.VideoRpcClient.PublishAction(context.Background(), &videoservice.DouyinPublishActionRequest{
-		Token: req.Token,
-		Data: ramda.Map(func(in int8) byte {
-			return byte(in)
-		})(req.Data),
-		Title: req.Title,
+	_, err = rpc.VideoRpcClient.PublishAction(context.Background(), &videoservice.DouyinPublishActionRequest{
+		Token: string(token),
+		Data:  data,
+		Title: string(title),
 	})
-	if err != nil || actionResponse == nil {
+	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMessage = fmt.Sprintf("上传失败: %v", err)
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
-	resp.StatusCode = int64(actionResponse.StatusCode)
-	resp.StatusMessage = actionResponse.StatusMsg
+	resp.StatusCode = 0
+	resp.StatusMessage = "上传成功"
 	c.JSON(consts.StatusOK, resp)
 }
 

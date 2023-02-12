@@ -14,12 +14,8 @@ redis:
   host: localhost
   port: 6379
 
-ftp:
-  host: localhost
-  port: 21
-  username: Anonymous
-  password:
 
-static:
-  url: localhost:8080
-  local_tmp_path: /tmp/static
+cos:
+  url: https://<bucket>.cos.<region>.myqcloud.com
+  secret_id:
+  secret_key:
