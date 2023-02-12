@@ -36,9 +36,16 @@ func Feed(_ context.Context, c *app.RequestContext) {
 	} else {
 		latestDate, _ = strconv.ParseInt(*req.LatestTime, 10, 64)
 	}
+	var token string
+	if req.Token == nil {
+		token = ""
+	} else {
+		token = *req.Token
+	}
 	feedResponse, err := rpc.VideoRpcClient.Feed(context.Background(),
 		&videoservice.DouyinFeedRequest{
 			LatestTime: latestDate,
+			Token:      token,
 		},
 	)
 	resp := new(api.FeedResp)
