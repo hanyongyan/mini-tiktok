@@ -128,12 +128,18 @@ func CastQueryVideoListtoVideoServiceVideo(from []queryVideoListRes) []*videoser
 
 // Feed implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFeedRequest) (resp *videoservice.DouyinFeedResponse, err error) {
-	//latestTime := req.LatestTime
-	var latestTime int64
-	latestTime = 0
+	latestTime := req.LatestTime
+	// 通过 token 解析出当前用户
+	//claims, flag := jwtutil.CheckToken(req.Token)
+	//// 说明 token 已经过期
+	//if !flag {
+	//	return nil, errors.New("token is expired")
+	//}
 	// 值为0（默认值）则说明不限制最新时间
 	tv := query.Q.TVideo.As("v")
 	tu := query.Q.TUser.As("u")
+	//tf := query.Q.TFavorite
+	//find, _ := tf.WithContext(context.Background()).Where(tf.UserID.Eq(claims.UserId)).Find()
 	var resList []queryVideoListRes
 	if latestTime == 0 {
 		err = tv.WithContext(context.Background()).
@@ -176,6 +182,14 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 	if resList == nil {
 		resList = []queryVideoListRes{}
 	}
+	// 查看视频中是否有用户已点过赞
+	//for _, v := range find {
+	//	for _, j := range resList{
+	//		if j.ID == v.VideoID {
+	//			j.IsFavorite = true
+	//		}
+	//	}
+	//}
 	resp = &videoservice.DouyinFeedResponse{
 		StatusCode: 0,
 		VideoList:  CastQueryVideoListtoVideoServiceVideo(resList),
@@ -295,7 +309,7 @@ func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.D
 	q := query.Q
 	favorite := q.TFavorite
 	// 查询数据库得到喜欢列表
-	data, err := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId)).Find()
+	data, err := q.WithContext(context.Background()).TFavorite.Where(favorite.UserID.Eq(claims.UserId), favorite.Status.Value(true)).Find()
 	ids := make([]int64, 10)
 	// 得到喜欢视频的所有id
 	for _, fav := range data {
@@ -320,7 +334,7 @@ func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.D
 		vid.Id = videosInfo.ID
 		vid.CoverUrl = videosInfo.CoverURL
 		vid.PlayUrl = videosInfo.PlayURL
-		vid.IsFavorite = videosInfo.IsFavorite
+		vid.IsFavorite = true
 		vid.Title = videosInfo.Title
 		first, _ := q.WithContext(context.Background()).TUser.Where(Tuser.ID.Eq(videosInfo.AuthorID)).First()
 		usr.Id = first.ID
