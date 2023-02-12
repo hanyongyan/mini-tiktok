@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
 	"os"
 	"time"
 
@@ -130,19 +131,23 @@ func CastQueryVideoListtoVideoServiceVideo(from []queryVideoListRes) []*videoser
 func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFeedRequest) (resp *videoservice.DouyinFeedResponse, err error) {
 	latestTime := req.LatestTime
 	// 通过 token 解析出当前用户
-	//claims, flag := jwtutil.CheckToken(req.Token)
-	//// 说明 token 已经过期
-	//if !flag {
-	//	return nil, errors.New("token is expired")
-	//}
+	var userId int64
+	if req.Token != "" {
+		claims, flag := jwtutil.CheckToken(req.Token)
+		if flag {
+			userId = claims.UserId
+		} else {
+			return nil, errors.New("token is expired")
+		}
+	}
+
 	// 值为0（默认值）则说明不限制最新时间
 	tv := query.Q.TVideo.As("v")
 	tu := query.Q.TUser.As("u")
-	//tf := query.Q.TFavorite
-	//find, _ := tf.WithContext(context.Background()).Where(tf.UserID.Eq(claims.UserId)).Find()
+	tf := query.Q.TFavorite.As("f")
 	var resList []queryVideoListRes
 	if latestTime == 0 {
-		err = tv.WithContext(context.Background()).
+		query := tv.WithContext(context.Background()).
 			Select(
 				tv.ID,
 				tv.AuthorID,
@@ -152,14 +157,29 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 			).
 			LeftJoin(tu, tu.ID.EqCol(tv.AuthorID)).
 			Order(tv.CreateDate.Desc()).
-			Limit(10).Scan(&resList)
-
+			Limit(10)
+		// 过滤刷到自己的视频的情况
+		if userId != 0 {
+			query = query.Where(tu.ID.Neq(userId))
+		}
+		err = query.Scan(&resList)
+		// 过滤已赞视频
+		if userId != 0 {
+			favourites, _ := tf.WithContext(ctx).Where(tf.UserID.Eq(userId)).Find()
+			favouritedVideoId := ramda.Map(func(it *model.TFavorite) int64 {
+				return it.VideoID
+			})(favourites)
+			set := mapset.NewSet(favouritedVideoId...)
+			resList = ramda.Filter(func(it queryVideoListRes) bool {
+				return !set.Contains(it.ID)
+			})(resList)
+		}
 		if err != nil {
 			return
 		}
 	} else {
 		t := time.Unix(latestTime/1000, 0)
-		err = tv.WithContext(context.Background()).
+		query := tv.WithContext(context.Background()).
 			Select(
 				tv.ID,
 				tv.AuthorID,
@@ -173,8 +193,23 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 			LeftJoin(tu, tu.ID.EqCol(tv.AuthorID)).
 			Where(tv.CreateDate.Lt(t)).
 			Order(tv.CreateDate.Desc()).
-			Limit(10).
-			Scan(&resList)
+			Limit(10)
+		// 过滤刷到自己的视频的情况
+		if userId != 0 {
+			query = query.Where(tu.ID.Neq(userId))
+		}
+		err = query.Scan(&resList)
+		// 过滤已赞视频
+		if userId != 0 {
+			favourites, _ := tf.WithContext(ctx).Where(tf.UserID.Eq(userId)).Find()
+			favouritedVideoId := ramda.Map(func(it *model.TFavorite) int64 {
+				return it.VideoID
+			})(favourites)
+			set := mapset.NewSet(favouritedVideoId...)
+			resList = ramda.Filter(func(it queryVideoListRes) bool {
+				return !set.Contains(it.ID)
+			})(resList)
+		}
 		if err != nil {
 			return
 		}
@@ -182,14 +217,7 @@ func (s *VideoServiceImpl) Feed(ctx context.Context, req *videoservice.DouyinFee
 	if resList == nil {
 		resList = []queryVideoListRes{}
 	}
-	// 查看视频中是否有用户已点过赞
-	//for _, v := range find {
-	//	for _, j := range resList{
-	//		if j.ID == v.VideoID {
-	//			j.IsFavorite = true
-	//		}
-	//	}
-	//}
+
 	resp = &videoservice.DouyinFeedResponse{
 		StatusCode: 0,
 		VideoList:  CastQueryVideoListtoVideoServiceVideo(resList),
