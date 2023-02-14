@@ -10,6 +10,7 @@ import (
 	chatservice "mini_tiktok/kitex_gen/chatservice"
 	"mini_tiktok/pkg/utils"
 	"strconv"
+	"time"
 )
 
 // MessageServiceImpl implements the last service interface defined in the IDL.
@@ -59,7 +60,7 @@ func (s *MessageServiceImpl) MessageChat(ctx context.Context, req *chatservice.M
 		return
 	}
 	resp = &chatservice.MessageChatResp{MessageList: ramda.Map(func(t model.Message) *chatservice.Message {
-		return &chatservice.Message{Id: int64(t.ID.Pid()), Content: t.Content, CreateTime: t.CreateTime.Format("2006-01-02 15:04:05")}
+		return &chatservice.Message{Id: int64(t.ID.Pid()), Content: t.Content, CreateTime: t.CreateTime.Format(time.Kitchen)}
 	})(messages)}
 
 	return
