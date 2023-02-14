@@ -6,6 +6,7 @@ import (
 	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/kitex_gen/chatservice"
 	"net/http"
+	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
 )
@@ -17,10 +18,20 @@ type ChatResponse struct {
 
 // MessageAction no practical effect, just check if token is valid
 func MessageAction(ctx context.Context, c *app.RequestContext) {
-	_, err := rpc.ChatRpcClient.MessageAction(ctx, &chatservice.MessageActionReq{
+	toUserId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ChatResponse{Response: Response{StatusCode: 1, StatusMsg: err.Error()}})
+		return
+	}
+	actionType, err := strconv.Atoi(c.Query("action_type"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ChatResponse{Response: Response{StatusCode: 1, StatusMsg: err.Error()}})
+		return
+	}
+	_, err = rpc.ChatRpcClient.MessageAction(ctx, &chatservice.DouyinMessageActionRequest{
 		Token:      c.Query("token"),
-		ToUserKey:  c.Query("to_user_id"),
-		ActionType: c.Query("action_type"),
+		ToUserId:   toUserId,
+		ActionType: int32(actionType),
 		Content:    c.Query("content"),
 	})
 	if err != nil {
@@ -34,8 +45,12 @@ func MessageAction(ctx context.Context, c *app.RequestContext) {
 // MessageChat all users have same follow list
 func MessageChat(ctx context.Context, c *app.RequestContext) {
 	token := c.Query("token")
-	toUserId := c.Query("to_user_id")
-	resp, err := rpc.ChatRpcClient.MessageChat(ctx, &chatservice.MessageChatReq{
+	toUserId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ChatResponse{Response: Response{StatusCode: 1, StatusMsg: err.Error()}})
+		return
+	}
+	resp, err := rpc.ChatRpcClient.MessageChat(ctx, &chatservice.DouyinMessageChatRequest{
 		Token: token, ToUserId: toUserId,
 	})
 	if err != nil {
@@ -43,6 +58,7 @@ func MessageChat(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}, MessageList: ramda.Map(func(t *chatservice.Message) Message {
-		return Message{Id: t.Id, Content: t.Content, CreateTime: t.CreateTime}
+		time, _ := strconv.ParseInt(*t.CreateTime, 10, 64)
+		return Message{Id: t.Id, Content: t.Content, CreateTime: time}
 	})(resp.GetMessageList())})
 }

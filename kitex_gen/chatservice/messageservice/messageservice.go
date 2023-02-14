@@ -43,7 +43,7 @@ func messageActionHandler(ctx context.Context, handler interface{}, arg, result 
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(chatservice.MessageActionReq)
+		req := new(chatservice.DouyinMessageActionRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
@@ -73,12 +73,12 @@ func newMessageActionResult() interface{} {
 }
 
 type MessageActionArgs struct {
-	Req *chatservice.MessageActionReq
+	Req *chatservice.DouyinMessageActionRequest
 }
 
 func (p *MessageActionArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(chatservice.MessageActionReq)
+		p.Req = new(chatservice.DouyinMessageActionRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -105,7 +105,7 @@ func (p *MessageActionArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *MessageActionArgs) Unmarshal(in []byte) error {
-	msg := new(chatservice.MessageActionReq)
+	msg := new(chatservice.DouyinMessageActionRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -113,9 +113,9 @@ func (p *MessageActionArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var MessageActionArgs_Req_DEFAULT *chatservice.MessageActionReq
+var MessageActionArgs_Req_DEFAULT *chatservice.DouyinMessageActionRequest
 
-func (p *MessageActionArgs) GetReq() *chatservice.MessageActionReq {
+func (p *MessageActionArgs) GetReq() *chatservice.DouyinMessageActionRequest {
 	if !p.IsSetReq() {
 		return MessageActionArgs_Req_DEFAULT
 	}
@@ -127,14 +127,14 @@ func (p *MessageActionArgs) IsSetReq() bool {
 }
 
 type MessageActionResult struct {
-	Success *chatservice.MessageActionResp
+	Success *chatservice.DouyinMessageActionResponse
 }
 
-var MessageActionResult_Success_DEFAULT *chatservice.MessageActionResp
+var MessageActionResult_Success_DEFAULT *chatservice.DouyinMessageActionResponse
 
 func (p *MessageActionResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(chatservice.MessageActionResp)
+		p.Success = new(chatservice.DouyinMessageActionResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -161,7 +161,7 @@ func (p *MessageActionResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *MessageActionResult) Unmarshal(in []byte) error {
-	msg := new(chatservice.MessageActionResp)
+	msg := new(chatservice.DouyinMessageActionResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (p *MessageActionResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *MessageActionResult) GetSuccess() *chatservice.MessageActionResp {
+func (p *MessageActionResult) GetSuccess() *chatservice.DouyinMessageActionResponse {
 	if !p.IsSetSuccess() {
 		return MessageActionResult_Success_DEFAULT
 	}
@@ -177,7 +177,7 @@ func (p *MessageActionResult) GetSuccess() *chatservice.MessageActionResp {
 }
 
 func (p *MessageActionResult) SetSuccess(x interface{}) {
-	p.Success = x.(*chatservice.MessageActionResp)
+	p.Success = x.(*chatservice.DouyinMessageActionResponse)
 }
 
 func (p *MessageActionResult) IsSetSuccess() bool {
@@ -188,7 +188,7 @@ func messageChatHandler(ctx context.Context, handler interface{}, arg, result in
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(chatservice.MessageChatReq)
+		req := new(chatservice.DouyinMessageChatRequest)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
@@ -218,12 +218,12 @@ func newMessageChatResult() interface{} {
 }
 
 type MessageChatArgs struct {
-	Req *chatservice.MessageChatReq
+	Req *chatservice.DouyinMessageChatRequest
 }
 
 func (p *MessageChatArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(chatservice.MessageChatReq)
+		p.Req = new(chatservice.DouyinMessageChatRequest)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -250,7 +250,7 @@ func (p *MessageChatArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *MessageChatArgs) Unmarshal(in []byte) error {
-	msg := new(chatservice.MessageChatReq)
+	msg := new(chatservice.DouyinMessageChatRequest)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -258,9 +258,9 @@ func (p *MessageChatArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var MessageChatArgs_Req_DEFAULT *chatservice.MessageChatReq
+var MessageChatArgs_Req_DEFAULT *chatservice.DouyinMessageChatRequest
 
-func (p *MessageChatArgs) GetReq() *chatservice.MessageChatReq {
+func (p *MessageChatArgs) GetReq() *chatservice.DouyinMessageChatRequest {
 	if !p.IsSetReq() {
 		return MessageChatArgs_Req_DEFAULT
 	}
@@ -272,14 +272,14 @@ func (p *MessageChatArgs) IsSetReq() bool {
 }
 
 type MessageChatResult struct {
-	Success *chatservice.MessageChatResp
+	Success *chatservice.DouyinMessageChatResponse
 }
 
-var MessageChatResult_Success_DEFAULT *chatservice.MessageChatResp
+var MessageChatResult_Success_DEFAULT *chatservice.DouyinMessageChatResponse
 
 func (p *MessageChatResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(chatservice.MessageChatResp)
+		p.Success = new(chatservice.DouyinMessageChatResponse)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -306,7 +306,7 @@ func (p *MessageChatResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *MessageChatResult) Unmarshal(in []byte) error {
-	msg := new(chatservice.MessageChatResp)
+	msg := new(chatservice.DouyinMessageChatResponse)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -314,7 +314,7 @@ func (p *MessageChatResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *MessageChatResult) GetSuccess() *chatservice.MessageChatResp {
+func (p *MessageChatResult) GetSuccess() *chatservice.DouyinMessageChatResponse {
 	if !p.IsSetSuccess() {
 		return MessageChatResult_Success_DEFAULT
 	}
@@ -322,7 +322,7 @@ func (p *MessageChatResult) GetSuccess() *chatservice.MessageChatResp {
 }
 
 func (p *MessageChatResult) SetSuccess(x interface{}) {
-	p.Success = x.(*chatservice.MessageChatResp)
+	p.Success = x.(*chatservice.DouyinMessageChatResponse)
 }
 
 func (p *MessageChatResult) IsSetSuccess() bool {
@@ -339,7 +339,7 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
-func (p *kClient) MessageAction(ctx context.Context, Req *chatservice.MessageActionReq) (r *chatservice.MessageActionResp, err error) {
+func (p *kClient) MessageAction(ctx context.Context, Req *chatservice.DouyinMessageActionRequest) (r *chatservice.DouyinMessageActionResponse, err error) {
 	var _args MessageActionArgs
 	_args.Req = Req
 	var _result MessageActionResult
@@ -349,7 +349,7 @@ func (p *kClient) MessageAction(ctx context.Context, Req *chatservice.MessageAct
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) MessageChat(ctx context.Context, Req *chatservice.MessageChatReq) (r *chatservice.MessageChatResp, err error) {
+func (p *kClient) MessageChat(ctx context.Context, Req *chatservice.DouyinMessageChatRequest) (r *chatservice.DouyinMessageChatResponse, err error) {
 	var _args MessageChatArgs
 	_args.Req = Req
 	var _result MessageChatResult

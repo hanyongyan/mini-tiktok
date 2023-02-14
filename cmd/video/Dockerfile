@@ -11,6 +11,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     && apk update --no-cache \
     && apk add ffmpeg  
 
-EXPOSE 9000
+EXPOSE 10000
 
 CMD ./app
