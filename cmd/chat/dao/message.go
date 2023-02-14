@@ -22,10 +22,10 @@ func (dao *MsgDao) initSession() {
 	dao.collection = mongodb.Mongo.Cli.Database(dbname).Collection(COLLECTION)
 }
 
-func (dao *MsgDao) GetAllByChatKey(ctx context.Context, chatKey string) ([]model.Message, error) {
+func (dao *MsgDao) GetAllByChatKey(ctx context.Context, fromUserId, toUserId int64) ([]model.Message, error) {
 	dao.initSession()
 	var messages []model.Message
-	find, err := dao.collection.Find(ctx, bson.M{"chat_key": chatKey})
+	find, err := dao.collection.Find(ctx, bson.M{"from_user_id": fromUserId, "to_user_id": toUserId})
 	if err != nil {
 		return messages, err
 	}
@@ -33,12 +33,13 @@ func (dao *MsgDao) GetAllByChatKey(ctx context.Context, chatKey string) ([]model
 	return messages, err
 }
 
-func (dao *MsgDao) Insert(ctx context.Context, chatKey, content string) error {
+func (dao *MsgDao) Insert(ctx context.Context, fromUserId, toUserId int64, content string) error {
 	dao.initSession()
 	_, err := dao.collection.InsertOne(ctx, bson.M{
-		"chat_key":    chatKey,
-		"content":     content,
-		"create_time": time.Now(),
+		"from_user_id": fromUserId,
+		"to_user_id":   toUserId,
+		"content":      content,
+		"create_time":  time.Now().UnixNano(),
 	})
 	return err
 }

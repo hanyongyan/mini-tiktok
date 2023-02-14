@@ -11,8 +11,8 @@ import (
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
-	MessageAction(ctx context.Context, Req *chatservice.MessageActionReq, callOptions ...callopt.Option) (r *chatservice.MessageActionResp, err error)
-	MessageChat(ctx context.Context, Req *chatservice.MessageChatReq, callOptions ...callopt.Option) (r *chatservice.MessageChatResp, err error)
+	MessageAction(ctx context.Context, Req *chatservice.DouyinMessageActionRequest, callOptions ...callopt.Option) (r *chatservice.DouyinMessageActionResponse, err error)
+	MessageChat(ctx context.Context, Req *chatservice.DouyinMessageChatRequest, callOptions ...callopt.Option) (r *chatservice.DouyinMessageChatResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -44,12 +44,12 @@ type kMessageServiceClient struct {
 	*kClient
 }
 
-func (p *kMessageServiceClient) MessageAction(ctx context.Context, Req *chatservice.MessageActionReq, callOptions ...callopt.Option) (r *chatservice.MessageActionResp, err error) {
+func (p *kMessageServiceClient) MessageAction(ctx context.Context, Req *chatservice.DouyinMessageActionRequest, callOptions ...callopt.Option) (r *chatservice.DouyinMessageActionResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.MessageAction(ctx, Req)
 }
 
-func (p *kMessageServiceClient) MessageChat(ctx context.Context, Req *chatservice.MessageChatReq, callOptions ...callopt.Option) (r *chatservice.MessageChatResp, err error) {
+func (p *kMessageServiceClient) MessageChat(ctx context.Context, Req *chatservice.DouyinMessageChatRequest, callOptions ...callopt.Option) (r *chatservice.DouyinMessageChatResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.MessageChat(ctx, Req)
 }
