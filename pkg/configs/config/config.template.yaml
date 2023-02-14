@@ -26,4 +26,4 @@ mongo:
   addr:
   username:
   password:
-  dbname:
+  dbname: mini_tiktok

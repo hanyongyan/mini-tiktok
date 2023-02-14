@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/nanakura/go-ramda"
 	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/kitex_gen/chatservice"
 	"net/http"
@@ -15,25 +15,13 @@ type ChatResponse struct {
 	MessageList []Message `json:"message_list"`
 }
 
-type MessageActionReq struct {
-	Token      string `json:"token"`
-	ToUserId   string `json:"to_user_id"`
-	ActionType string `json:"action_type"`
-	Content    string `json:"content"`
-}
-
 // MessageAction no practical effect, just check if token is valid
 func MessageAction(ctx context.Context, c *app.RequestContext) {
-	var req MessageActionReq
-	if err := c.Bind(&req); err != nil {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: err.Error()})
-		return
-	}
 	_, err := rpc.ChatRpcClient.MessageAction(ctx, &chatservice.MessageActionReq{
-		Token:      req.Token,
-		ToUserKey:  req.ToUserId,
-		ActionType: req.ActionType,
-		Content:    req.Content,
+		Token:      c.Query("token"),
+		ToUserKey:  c.Query("to_user_id"),
+		ActionType: c.Query("action_type"),
+		Content:    c.Query("content"),
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Response{StatusCode: 1, StatusMsg: err.Error()})
@@ -54,9 +42,7 @@ func MessageChat(ctx context.Context, c *app.RequestContext) {
 		c.JSON(http.StatusInternalServerError, ChatResponse{Response: Response{StatusCode: 1, StatusMsg: err.Error()}})
 		return
 	}
-	c.JSON(http.StatusOK, utils.H{
-		"status_code":  0,
-		"message_list": resp.GetMessageList(),
-	})
+	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}, MessageList: ramda.Map(func(t *chatservice.Message) Message {
+		return Message{Id: t.Id, Content: t.Content, CreateTime: t.CreateTime}
+	})(resp.GetMessageList())})
 }
-

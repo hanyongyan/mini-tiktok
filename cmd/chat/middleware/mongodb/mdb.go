@@ -1,12 +1,12 @@
 package mongodb
 
 import (
-	mgo "gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // MongoDB manages MongoDB connection
 type MongoDB struct {
-	DbSession  *mgo.Session
+	Cli *mongo.Client
 	Databasename string
 }
 

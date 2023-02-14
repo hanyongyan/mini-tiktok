@@ -1,7 +1,8 @@
 package dao
 
 import (
-	"gopkg.in/mgo.v2"
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
 	"mini_tiktok/cmd/chat/middleware/mongodb"
 	"mini_tiktok/cmd/chat/model"
@@ -9,8 +10,7 @@ import (
 )
 
 type MsgDao struct {
-	session    *mgo.Session
-	collection *mgo.Collection
+	collection *mongo.Collection
 }
 
 const (
@@ -18,25 +18,27 @@ const (
 )
 
 func (dao *MsgDao) initSession() {
-	dao.session = mongodb.Mongo.DbSession.Copy()
-	dao.collection = dao.session.DB(mongodb.Mongo.Databasename).C(COLLECTION)
+	dbname := mongodb.Mongo.Databasename
+	dao.collection = mongodb.Mongo.Cli.Database(dbname).Collection(COLLECTION)
 }
 
-func (dao *MsgDao) close() {
-	dao.session.Close()
-}
-
-func (dao *MsgDao) GetAllByChatKey(chatKey string) ([]model.Message, error) {
+func (dao *MsgDao) GetAllByChatKey(ctx context.Context, chatKey string) ([]model.Message, error) {
 	dao.initSession()
-	defer dao.close()
 	var messages []model.Message
-	err := dao.collection.Find(bson.M{"chat_key": chatKey}).All(&messages)
+	find, err := dao.collection.Find(ctx, bson.M{"chat_key": chatKey})
+	if err != nil {
+		return messages, err
+	}
+	err = find.All(ctx, &messages)
 	return messages, err
 }
 
-func (dao *MsgDao) Insert(chatKey, content string) error {
+func (dao *MsgDao) Insert(ctx context.Context, chatKey, content string) error {
 	dao.initSession()
-	defer dao.close()
-	msg := model.Message{ChatKey: chatKey, Content: content, CreateTime: time.Now()}
-	return dao.collection.Insert(msg)
+	_, err := dao.collection.InsertOne(ctx, bson.M{
+		"chat_key":    chatKey,
+		"content":     content,
+		"create_time": time.Now(),
+	})
+	return err
 }

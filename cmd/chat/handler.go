@@ -31,7 +31,7 @@ func (s *MessageServiceImpl) MessageAction(ctx context.Context, req *chatservice
 	}
 	chatKey := genChatKey(userId, toUserId)
 	msgDao := new(dao.MsgDao)
-	err = msgDao.Insert(chatKey, req.GetContent())
+	err = msgDao.Insert(ctx, chatKey, req.GetContent())
 	if err != nil {
 		err = fmt.Errorf("事务失败：%w", err)
 		return
@@ -54,13 +54,13 @@ func (s *MessageServiceImpl) MessageChat(ctx context.Context, req *chatservice.M
 	}
 	chatKey := genChatKey(userId, toUserId)
 	msgDao := new(dao.MsgDao)
-	messages, err := msgDao.GetAllByChatKey(chatKey)
+	messages, err := msgDao.GetAllByChatKey(ctx, chatKey)
 	if err != nil {
 		err = fmt.Errorf("事务失败：%w", err)
 		return
 	}
-	resp = &chatservice.MessageChatResp{MessageList: ramda.Map(func(t model.Message) *chatservice.Message {
-		return &chatservice.Message{Id: int64(t.ID.Pid()), Content: t.Content, CreateTime: t.CreateTime.Format(time.Kitchen)}
+	resp = &chatservice.MessageChatResp{MessageList: ramda.MapIndexed(func(t model.Message, idx int) *chatservice.Message {
+		return &chatservice.Message{Id: int64(idx) + 1, Content: t.Content, CreateTime: t.CreateTime.Format(time.Kitchen)}
 	})(messages)}
 
 	return
