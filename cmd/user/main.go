@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"mini_tiktok/pkg/nacos"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
@@ -12,9 +13,6 @@ import (
 	"github.com/kitex-contrib/obs-opentelemetry/provider"
 	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	"github.com/kitex-contrib/registry-nacos/registry"
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
 	"mini_tiktok/cmd/user/rpc"
 	"mini_tiktok/kitex_gen/userservice/userservice"
 	"mini_tiktok/pkg/configs/config"
@@ -26,6 +24,7 @@ import (
 func Init() {
 	// 配置的初始化要放在最前面
 	config.Init()
+	nacos.Init()
 	rpc.Init()
 	dal.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
@@ -38,32 +37,6 @@ func main() {
 		provider.WithExportEndpoint(consts.ExportEndpoint),
 		provider.WithInsecure(),
 	)
-
-	sc := []constant.ServerConfig{
-		*constant.NewServerConfig(consts.NacosAddr, consts.NacosPort),
-	}
-
-	cc := constant.ClientConfig{
-		NamespaceId:         "public",
-		TimeoutMs:           5000,
-		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
-		LogLevel:            "info",
-		Username:            "nacos",
-		Password:            "nacos",
-	}
-
-	cli, err := clients.NewNamingClient(
-		vo.NacosClientParam{
-			ClientConfig:  &cc,
-			ServerConfigs: sc,
-		},
-	)
-	if err != nil {
-		panic(err)
-	}
-
 	Init()
 
 	svr := userservice.NewServer(new(UserServiceImpl),
@@ -73,10 +46,10 @@ func main() {
 		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.UserServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),
-		server.WithRegistry(registry.NewNacosRegistry(cli)),
+		server.WithRegistry(registry.NewNacosRegistry(nacos.NacosClient)),
 	)
 
-	err = svr.Run()
+	err := svr.Run()
 
 	if err != nil {
 		klog.Fatal(err)

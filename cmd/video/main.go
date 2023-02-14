@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"mini_tiktok/cmd/video/mw/cos"
+	"mini_tiktok/pkg/nacos"
 	"net"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -14,9 +15,6 @@ import (
 	"github.com/kitex-contrib/obs-opentelemetry/provider"
 	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	"github.com/kitex-contrib/registry-nacos/registry"
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
 	"mini_tiktok/cmd/video/rpc"
 	"mini_tiktok/kitex_gen/videoservice/videoservice"
 	"mini_tiktok/pkg/cache"
@@ -29,6 +27,7 @@ import (
 func Init() {
 	// 配置的初始化要放在最前面
 	config.Init()
+	nacos.Init()
 	cache.Init()
 	rpc.Init()
 	dal.Init()
@@ -45,36 +44,12 @@ func main() {
 		provider.WithInsecure(),
 	)
 	defer p.Shutdown(context.Background())
+	Init()
 
-	sc := []constant.ServerConfig{
-		*constant.NewServerConfig(consts.NacosAddr, consts.NacosPort),
-	}
-
-	cc := constant.ClientConfig{
-		NamespaceId:         "public",
-		TimeoutMs:           5000,
-		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
-		LogLevel:            "info",
-		Username:            "nacos",
-		Password:            "nacos",
-	}
-
-	cli, err := clients.NewNamingClient(
-		vo.NacosClientParam{
-			ClientConfig:  &cc,
-			ServerConfigs: sc,
-		},
-	)
-	if err != nil {
-		panic(err)
-	}
 	addr, err := net.ResolveTCPAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.VideoServiceAddr))
 	if err != nil {
 		panic(err)
 	}
-	Init()
 	svr := videoservice.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
@@ -82,7 +57,7 @@ func main() {
 		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.VideoServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),
-		server.WithRegistry(registry.NewNacosRegistry(cli)),
+		server.WithRegistry(registry.NewNacosRegistry(nacos.NacosClient)),
 	)
 
 	err = svr.Run()

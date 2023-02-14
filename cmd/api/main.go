@@ -12,17 +12,16 @@ import (
 	"github.com/hertz-contrib/obs-opentelemetry/tracing"
 	"github.com/hertz-contrib/pprof"
 	"github.com/hertz-contrib/registry/nacos"
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
 	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
+	nacosmw "mini_tiktok/pkg/nacos"
 )
 
 func Init() {
 	// 配置初始化要放在最前面
 	config.Init()
+	nacosmw.Init()
 	rpc.Init()
 	hlog.SetLogger(hertzlogrus.NewLogger())
 	hlog.SetLevel(hlog.LevelDebug)
@@ -30,30 +29,7 @@ func Init() {
 
 func main() {
 	Init()
-
-	sc := []constant.ServerConfig{
-		*constant.NewServerConfig(consts.NacosAddr, consts.NacosPort),
-	}
-
-	cc := constant.ClientConfig{
-		NamespaceId:         "public",
-		TimeoutMs:           5000,
-		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
-		LogLevel:            "info",
-	}
-	nacoscli, err := clients.NewNamingClient(
-		vo.NacosClientParam{
-			ClientConfig:  &cc,
-			ServerConfigs: sc,
-		},
-	)
-	if err != nil {
-		panic(err)
-	}
-	r := nacos.NewNacosRegistry(nacoscli)
-
+	r := nacos.NewNacosRegistry(nacosmw.NacosClient)
 	tracer, cfg := tracing.NewServerTracer()
 	addr := "0.0.0.0:8080"
 	h := server.New(
