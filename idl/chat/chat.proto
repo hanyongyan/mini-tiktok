@@ -21,7 +21,7 @@ message MessageActionResp {
 
 message MessageChatReq {
     string token = 1;
-    string Content = 2;
+    string toUserId = 2;
 }
 
 message MessageChatResp {

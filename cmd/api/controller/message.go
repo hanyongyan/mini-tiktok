@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"fmt"
+	"github.com/cloudwego/hertz/pkg/common/utils"
 	"mini_tiktok/cmd/api/rpc"
 	"mini_tiktok/kitex_gen/chatservice"
 	"net/http"
@@ -23,10 +23,20 @@ type MessageActionReq struct {
 }
 
 // MessageAction no practical effect, just check if token is valid
-func MessageAction(_ context.Context, c *app.RequestContext) {
+func MessageAction(ctx context.Context, c *app.RequestContext) {
 	var req MessageActionReq
 	if err := c.Bind(&req); err != nil {
 		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: err.Error()})
+		return
+	}
+	_, err := rpc.ChatRpcClient.MessageAction(ctx, &chatservice.MessageActionReq{
+		Token:      req.Token,
+		ToUserKey:  req.ToUserId,
+		ActionType: req.ActionType,
+		Content:    req.Content,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{StatusCode: 1, StatusMsg: err.Error()})
 		return
 	}
 
@@ -35,15 +45,18 @@ func MessageAction(_ context.Context, c *app.RequestContext) {
 
 // MessageChat all users have same follow list
 func MessageChat(ctx context.Context, c *app.RequestContext) {
-	//token := c.Query("token")
-	//toUserId := c.Query("to_user_id")
-	rpc.ChatRpcClient.MessageChat(ctx, chatservice.MessageChatReq{})
-	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}})
+	token := c.Query("token")
+	toUserId := c.Query("to_user_id")
+	resp, err := rpc.ChatRpcClient.MessageChat(ctx, &chatservice.MessageChatReq{
+		Token: token, ToUserId: toUserId,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ChatResponse{Response: Response{StatusCode: 1, StatusMsg: err.Error()}})
+		return
+	}
+	c.JSON(http.StatusOK, utils.H{
+		"status_code":  0,
+		"message_list": resp.GetMessageList(),
+	})
 }
 
-func genChatKey(userIdA int64, userIdB int64) string {
-	if userIdA > userIdB {
-		return fmt.Sprintf("%d_%d", userIdB, userIdA)
-	}
-	return fmt.Sprintf("%d_%d", userIdA, userIdB)
-}

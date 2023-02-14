@@ -151,12 +151,12 @@ ReadFieldError:
 }
 
 func (x *MessageChatReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.ChatKey, offset, err = fastpb.ReadString(buf, _type)
+	x.Token, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
 func (x *MessageChatReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.MsgContent, offset, err = fastpb.ReadString(buf, _type)
+	x.ToUserId, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
@@ -284,18 +284,18 @@ func (x *MessageChatReq) FastWrite(buf []byte) (offset int) {
 }
 
 func (x *MessageChatReq) fastWriteField1(buf []byte) (offset int) {
-	if x.ChatKey == "" {
+	if x.Token == "" {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.ChatKey)
+	offset += fastpb.WriteString(buf[offset:], 1, x.Token)
 	return offset
 }
 
 func (x *MessageChatReq) fastWriteField2(buf []byte) (offset int) {
-	if x.MsgContent == "" {
+	if x.ToUserId == "" {
 		return offset
 	}
-	offset += fastpb.WriteString(buf[offset:], 2, x.MsgContent)
+	offset += fastpb.WriteString(buf[offset:], 2, x.ToUserId)
 	return offset
 }
 
@@ -411,18 +411,18 @@ func (x *MessageChatReq) Size() (n int) {
 }
 
 func (x *MessageChatReq) sizeField1() (n int) {
-	if x.ChatKey == "" {
+	if x.Token == "" {
 		return n
 	}
-	n += fastpb.SizeString(1, x.ChatKey)
+	n += fastpb.SizeString(1, x.Token)
 	return n
 }
 
 func (x *MessageChatReq) sizeField2() (n int) {
-	if x.MsgContent == "" {
+	if x.ToUserId == "" {
 		return n
 	}
-	n += fastpb.SizeString(2, x.MsgContent)
+	n += fastpb.SizeString(2, x.ToUserId)
 	return n
 }
 
@@ -460,8 +460,8 @@ var fieldIDToName_MessageActionReq = map[int32]string{
 var fieldIDToName_MessageActionResp = map[int32]string{}
 
 var fieldIDToName_MessageChatReq = map[int32]string{
-	1: "ChatKey",
-	2: "MsgContent",
+	1: "Token",
+	2: "ToUserId",
 }
 
 var fieldIDToName_MessageChatResp = map[int32]string{
