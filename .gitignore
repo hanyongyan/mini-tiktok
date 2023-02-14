@@ -1,4 +1,3 @@
 .idea
 /pkg/configs/config/config.yaml
 /pkg/configs/config/init.go
-.gitignore
