@@ -3,7 +3,7 @@ package messageservice
 
 import (
 	server "github.com/cloudwego/kitex/server"
-	chatservice "mini_tiktok/kitex_gen/service/ChatService"
+	chatservice "mini_tiktok/kitex_gen/chatservice"
 )
 
 // NewServer creates a server.Server with the given handler and options.

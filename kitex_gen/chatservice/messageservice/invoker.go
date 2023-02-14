@@ -4,7 +4,7 @@ package messageservice
 
 import (
 	server "github.com/cloudwego/kitex/server"
-	chatservice "mini_tiktok/kitex_gen/service/ChatService"
+	chatservice "mini_tiktok/kitex_gen/chatservice"
 )
 
 // NewInvoker creates a server.Invoker with the given handler and options.

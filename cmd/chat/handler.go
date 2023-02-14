@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	chatservice "mini_tiktok/kitex_gen/service/ChatService"
+	chatservice "mini_tiktok/kitex_gen/chatservice"
 )
 
 // MessageServiceImpl implements the last service interface defined in the IDL.

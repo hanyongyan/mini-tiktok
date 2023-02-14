@@ -6,13 +6,13 @@ import (
 	"context"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
-	chatservice "mini_tiktok/kitex_gen/service/ChatService"
+	chatservice "mini_tiktok/kitex_gen/chatservice"
 )
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
-	MessageAction(ctx context.Context, req *chatservice.MessageActionReq, callOptions ...callopt.Option) (r *chatservice.MessageActionResp, err error)
-	MessageChat(ctx context.Context, req *chatservice.MessageChatReq, callOptions ...callopt.Option) (r *chatservice.MessageChatResp, err error)
+	MessageAction(ctx context.Context, Req *chatservice.MessageActionReq, callOptions ...callopt.Option) (r *chatservice.MessageActionResp, err error)
+	MessageChat(ctx context.Context, Req *chatservice.MessageChatReq, callOptions ...callopt.Option) (r *chatservice.MessageChatResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -44,12 +44,12 @@ type kMessageServiceClient struct {
 	*kClient
 }
 
-func (p *kMessageServiceClient) MessageAction(ctx context.Context, req *chatservice.MessageActionReq, callOptions ...callopt.Option) (r *chatservice.MessageActionResp, err error) {
+func (p *kMessageServiceClient) MessageAction(ctx context.Context, Req *chatservice.MessageActionReq, callOptions ...callopt.Option) (r *chatservice.MessageActionResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.MessageAction(ctx, req)
+	return p.kClient.MessageAction(ctx, Req)
 }
 
-func (p *kMessageServiceClient) MessageChat(ctx context.Context, req *chatservice.MessageChatReq, callOptions ...callopt.Option) (r *chatservice.MessageChatResp, err error) {
+func (p *kMessageServiceClient) MessageChat(ctx context.Context, Req *chatservice.MessageChatReq, callOptions ...callopt.Option) (r *chatservice.MessageChatResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.MessageChat(ctx, req)
+	return p.kClient.MessageChat(ctx, Req)
 }

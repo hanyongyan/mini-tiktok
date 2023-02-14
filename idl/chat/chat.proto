@@ -20,8 +20,8 @@ message MessageActionResp {
 }
 
 message MessageChatReq {
-    string ChatKey = 1;
-    string MsgContent = 2;
+    string token = 1;
+    string Content = 2;
 }
 
 message MessageChatResp {

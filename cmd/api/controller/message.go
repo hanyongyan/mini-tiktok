@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"fmt"
+	"mini_tiktok/cmd/api/rpc"
+	"mini_tiktok/kitex_gen/chatservice"
 	"net/http"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -14,10 +16,10 @@ type ChatResponse struct {
 }
 
 type MessageActionReq struct {
-	Token string `json:"token"`
-	ToUserId string  `json:"to_user_id"`
-	ActionType string  `json:"action_type"`
-	Content string  `json:"content"`
+	Token      string `json:"token"`
+	ToUserId   string `json:"to_user_id"`
+	ActionType string `json:"action_type"`
+	Content    string `json:"content"`
 }
 
 // MessageAction no practical effect, just check if token is valid
@@ -32,10 +34,10 @@ func MessageAction(_ context.Context, c *app.RequestContext) {
 }
 
 // MessageChat all users have same follow list
-func MessageChat(_ context.Context, c *app.RequestContext) {
+func MessageChat(ctx context.Context, c *app.RequestContext) {
 	//token := c.Query("token")
 	//toUserId := c.Query("to_user_id")
-
+	rpc.ChatRpcClient.MessageChat(ctx, chatservice.MessageChatReq{})
 	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}})
 }
 
