@@ -3,10 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"mini_tiktok/cmd/video/mw/cos"
-	"mini_tiktok/pkg/nacos"
-	"net"
-
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -15,47 +11,45 @@ import (
 	"github.com/kitex-contrib/obs-opentelemetry/provider"
 	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	"github.com/kitex-contrib/registry-nacos/registry"
-	"mini_tiktok/cmd/video/rpc"
-	"mini_tiktok/kitex_gen/videoservice/videoservice"
-	"mini_tiktok/pkg/cache"
+	"log"
+	"mini_tiktok/cmd/chat/middleware/mongodb"
+	"mini_tiktok/cmd/chat/rpc"
+	chatservice "mini_tiktok/kitex_gen/chatservice/messageservice"
 	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
-	"mini_tiktok/pkg/dal"
 	"mini_tiktok/pkg/mw"
+	"mini_tiktok/pkg/nacos"
+	"net"
 )
 
 func Init() {
-	// 配置的初始化要放在最前面
 	config.Init()
 	nacos.Init()
-	cache.Init()
 	rpc.Init()
-	dal.Init()
-	cos.Init()
-	//task.Init()
+	mongodb.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
-	klog.SetLevel(klog.LevelInfo)
+	klog.SetLevel(klog.LevelDebug)
 }
 
 func main() {
 	p := provider.NewOpenTelemetryProvider(
-		provider.WithServiceName(consts.VideoServiceName),
+		provider.WithServiceName(consts.ChatServiceName),
 		provider.WithExportEndpoint(consts.ExportEndpoint),
 		provider.WithInsecure(),
 	)
 	defer p.Shutdown(context.Background())
 	Init()
 
-	addr, err := net.ResolveTCPAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.VideoServiceAddr))
+	addr, err := net.ResolveTCPAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.ChatServiceAddr))
 	if err != nil {
 		panic(err)
 	}
-	svr := videoservice.NewServer(new(VideoServiceImpl),
+	svr := chatservice.NewServer(new(MessageServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
-		//server.WithMiddleware(mw.CommonMiddleware),
+		server.WithMiddleware(mw.CommonMiddleware),
 		server.WithMiddleware(mw.ServerMiddleware),
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.VideoServiceName}),
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.ChatServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),
 		server.WithRegistry(registry.NewNacosRegistry(nacos.NacosClient)),
 	)
@@ -63,6 +57,6 @@ func main() {
 	err = svr.Run()
 
 	if err != nil {
-		klog.Fatal(err)
+		log.Println(err.Error())
 	}
 }

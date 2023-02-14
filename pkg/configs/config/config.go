@@ -21,4 +21,10 @@ type GlobalConfig struct {
 		SecretId string  `mapstructure:"secret_id"`
 		SecretKey string `mapstructure:"secret_key"`
 	} `mapstructure:"cos"`
+	MongoDbConfig struct{
+		Addr string `mapstructure:"addr"`
+		Username string `mapstructure:"username"`
+		Password string `mapstructure:"password"`
+		DbName string `mapstructure:"dbname"`
+	} `mapstructure:"mongo"`
 }

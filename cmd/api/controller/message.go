@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
-	"fmt"
+	"github.com/nanakura/go-ramda"
+	"mini_tiktok/cmd/api/rpc"
+	"mini_tiktok/kitex_gen/chatservice"
 	"net/http"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -14,18 +16,33 @@ type ChatResponse struct {
 }
 
 // MessageAction no practical effect, just check if token is valid
-func MessageAction(_ context.Context, c *app.RequestContext) {
+func MessageAction(ctx context.Context, c *app.RequestContext) {
+	_, err := rpc.ChatRpcClient.MessageAction(ctx, &chatservice.MessageActionReq{
+		Token:      c.Query("token"),
+		ToUserKey:  c.Query("to_user_id"),
+		ActionType: c.Query("action_type"),
+		Content:    c.Query("content"),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Response{StatusCode: 1, StatusMsg: err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, Response{StatusCode: 0})
 }
 
 // MessageChat all users have same follow list
-func MessageChat(_ context.Context, c *app.RequestContext) {
-	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}})
-}
-
-func genChatKey(userIdA int64, userIdB int64) string {
-	if userIdA > userIdB {
-		return fmt.Sprintf("%d_%d", userIdB, userIdA)
+func MessageChat(ctx context.Context, c *app.RequestContext) {
+	token := c.Query("token")
+	toUserId := c.Query("to_user_id")
+	resp, err := rpc.ChatRpcClient.MessageChat(ctx, &chatservice.MessageChatReq{
+		Token: token, ToUserId: toUserId,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ChatResponse{Response: Response{StatusCode: 1, StatusMsg: err.Error()}})
+		return
 	}
-	return fmt.Sprintf("%d_%d", userIdA, userIdB)
+	c.JSON(http.StatusOK, ChatResponse{Response: Response{StatusCode: 0}, MessageList: ramda.Map(func(t *chatservice.Message) Message {
+		return Message{Id: t.Id, Content: t.Content, CreateTime: t.CreateTime}
+	})(resp.GetMessageList())})
 }

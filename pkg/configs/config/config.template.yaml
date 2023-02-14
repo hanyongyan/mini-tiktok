@@ -1,4 +1,4 @@
-
+# mysql数据库配置
 db:
   host: localhost
   port: 3306
@@ -10,12 +10,20 @@ mq:
   host: localhost
   port: 9093
 
+# redis配置
 redis:
   host: localhost
   port: 6379
 
-
+# 腾讯云对象存储配置
 cos:
   url: https://<bucket>.cos.<region>.myqcloud.com
   secret_id:
   secret_key:
+
+# mongodb配置
+mongo:
+  addr:
+  username:
+  password:
+  dbname: mini_tiktok
