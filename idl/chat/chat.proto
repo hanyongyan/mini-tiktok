@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package="chatservice";
+package service.ChatService;
+
+message Message {
+    int64 id = 1;
+    string content = 2;
+    string createTime = 3;
+}
+
+message MessageActionReq {
+    string token = 1;
+    string toUserKey = 2;
+    string actionType = 3;
+    string content = 4;
+}
+
+message MessageActionResp {
+}
+
+message MessageChatReq {
+    string ChatKey = 1;
+    string MsgContent = 2;
+}
+
+message MessageChatResp {
+    repeated Message messageList = 1;
+}
+
+service MessageService {
+    rpc MessageAction(MessageActionReq)returns(MessageActionResp);
+    rpc MessageChat(MessageChatReq)returns(MessageChatResp);
+}
