@@ -5,8 +5,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/sourcegraph/conc"
+	"mini_tiktok/cmd/video/global"
+	"mini_tiktok/cmd/video/mw/asynqmw"
 	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -21,27 +22,20 @@ func SaveUploadedFile(ctx context.Context, file []byte, videoFileName string) (s
 		err = fmt.Errorf("上传失败：%w", err)
 		return
 	}
-	defer os.Remove(tmpVideoPath)
-	// TODO 队列防ffmpeg并发冲突
-	// 使用 cmd 命令调用 ffmpeg 生成截图 ，传入的参数一为 视频的真实路径，参数二为生成图片保存的真实路径
-	tempPhotoPath := fmt.Sprintf("%s/test-%s.jpg", os.TempDir(), strings.Split(videoFileName, ".")[0])
-	cmd := exec.Command("ffmpeg", "-i", tmpVideoPath, tempPhotoPath,
-		"-ss", "00:00:00", "-r", "1", "-vframes", "1", "-an", "-vcodec", "mjpeg")
-	_ = cmd.Run()
-	defer os.Remove(tempPhotoPath)
 	var wg conc.WaitGroup
 	// 上传视频到cos
 	wg.Go(func() {
-		_, e := client.Object.Put(ctx, saveVideoPath, bytes.NewReader(file), nil)
+		_, e := global.CosClient.Object.Put(ctx, saveVideoPath, bytes.NewReader(file), nil)
 		if e != nil {
-			err = fmt.Errorf("上传失败：%w", e)
+			err = fmt.Errorf("上传视频失败：%w", e)
 		}
 	})
 	// 截图上传到cos
 	wg.Go(func() {
-		_, err = client.Object.PutFromFile(ctx, savePhotoPath, tempPhotoPath, nil)
+		tempPhotoPath := fmt.Sprintf("%s/test-%s.jpg", os.TempDir(), strings.Split(videoFileName, ".")[0])
+		err = asynqmw.NewTask(savePhotoPath, tmpVideoPath, tempPhotoPath)
 		if err != nil {
-			err = fmt.Errorf("上传失败：%w", err)
+			err = fmt.Errorf("上传视频缩略图失败：%w", err)
 		}
 	})
 	wg.Wait()

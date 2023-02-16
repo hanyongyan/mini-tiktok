@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"mini_tiktok/cmd/video/mw/asynqmw"
 	"mini_tiktok/cmd/video/mw/cos"
 	"mini_tiktok/pkg/nacos"
 	"net"
@@ -32,6 +33,7 @@ func Init() {
 	rpc.Init()
 	dal.Init()
 	cos.Init()
+	asynqmw.Init()
 	//task.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
