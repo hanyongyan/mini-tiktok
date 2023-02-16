@@ -2,6 +2,7 @@ package cos
 
 import (
 	"github.com/tencentyun/cos-go-sdk-v5"
+	"mini_tiktok/cmd/video/global"
 	"mini_tiktok/pkg/configs/config"
 	"net/http"
 	"net/url"
@@ -9,7 +10,6 @@ import (
 )
 
 var (
-	client *cos.Client
 )
 
 func Init() {
@@ -18,7 +18,7 @@ func Init() {
 	cfg := config.GlobalConfigs.CosConfig
 	u, _ := url.Parse(cfg.Url)
 	b := &cos.BaseURL{BucketURL: u}
-	client = cos.NewClient(b, &http.Client{
+	global.CosClient = cos.NewClient(b, &http.Client{
 		//设置超时时间
 		Timeout: 100 * time.Second,
 		Transport: &cos.AuthorizationTransport{

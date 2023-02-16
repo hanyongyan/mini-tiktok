@@ -292,7 +292,6 @@ func (s *VideoServiceImpl) FavoriteAction(ctx context.Context, req *videoservice
 // 2.0 将redis中的数据一起查
 // FavoriteList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.DouyinFavoriteListRequest) (resp *videoservice.DouyinFavoriteListResponse, err error) {
-	// TODO: Your code here...
 	// 通过 token 解析出当前用户
 	claims, flag := jwtutil.CheckToken(req.Token)
 	// 说明 token 已经过期
@@ -349,7 +348,6 @@ func (s *VideoServiceImpl) FavoriteList(ctx context.Context, req *videoservice.D
 
 // CommentAction implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) CommentAction(ctx context.Context, req *videoservice.DouyinCommentActionRequest) (resp *videoservice.DouyinCommentActionResponse, err error) {
-	// TODO: Your code here...
 	// 评论操作
 	queryUser := query.Q.TUser
 	queryVideo := query.Q.TVideo
@@ -417,7 +415,6 @@ func (s *VideoServiceImpl) CommentAction(ctx context.Context, req *videoservice.
 
 // CommentList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) CommentList(ctx context.Context, req *videoservice.DouyinCommentListRequest) (resp *videoservice.DouyinCommentListResponse, err error) {
-	// TODO: Your code here...
 	// 获取评论
 	queryUser := query.Q.TUser
 	queryComment := query.Q.TComment
