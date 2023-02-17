@@ -43,6 +43,7 @@ func main() {
 			Tags:        nil,
 		}),
 		tracer,
+		server.WithMaxRequestBodySize(100*1024*1024),
 	)
 	pprof.Register(h)
 	h.Use(tracing.ServerMiddleware(cfg))

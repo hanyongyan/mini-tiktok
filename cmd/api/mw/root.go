@@ -29,7 +29,7 @@ func rootMw() []app.HandlerFunc {
 			},
 		)),
 		// use gzip mw
-		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".jpg", ".mp4", ".png"})),
+		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".jpg", ".mp4", ".png", ".avi", ".wmv"})),
 		// use limiter mw
 		// limiter.AdaptiveLimit(limiter.WithCPUThreshold(900)),
 	}
