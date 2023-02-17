@@ -3,9 +3,9 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -26,19 +26,27 @@ func Publish(_ context.Context, c *app.RequestContext) {
 	var err error
 	title := c.FormValue("title")
 	token := c.FormValue("token")
-	f, _ := c.FormFile("data")
+	f, err := c.FormFile("data")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Response{StatusCode: 1, StatusMsg: err.Error()})
+		return
+	}
+
 	data := make([]byte, f.Size)
 	fd, _ := f.Open()
 	fd.Read(data)
 	fd.Close()
+	contentType := http.DetectContentType(data)
+	fileIsVideo := strings.HasPrefix(contentType, "video/")
+	if !fileIsVideo {
+		c.JSON(http.StatusBadRequest, Response{StatusCode: 1, StatusMsg: "文件格式非法"})
+		return
+	}
 	if len(title) == 0 {
 		c.JSON(http.StatusBadRequest, Response{StatusCode: 1, StatusMsg: "标题不能为空"})
 		return
 	}
 
-	hlog.Info("视频标题", string(title))
-
-	hlog.Info("query", len(data))
 	if len(data) == 0 {
 		c.JSON(consts.StatusBadRequest, Response{StatusCode: 1, StatusMsg: "视频不能为空"})
 		return
