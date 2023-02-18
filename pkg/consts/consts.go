@@ -17,4 +17,5 @@ const (
 	IdentityKey          = "id"
 	MaxMsgCount          = 100
 	FavoriteActionPrefix = "FavoriteAction_"
+	FavoriteCountPrefix  = "FavoriteCount_"
 )

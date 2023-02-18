@@ -3,6 +3,7 @@ package like
 import (
 	"context"
 	"fmt"
+	"mini_tiktok/pkg/dal/model"
 	"strconv"
 	"strings"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/go-co-op/gocron"
 	"mini_tiktok/pkg/cache"
 	"mini_tiktok/pkg/consts"
-	"mini_tiktok/pkg/dal/model"
 	"mini_tiktok/pkg/dal/query"
 )
 
@@ -28,42 +28,65 @@ func Init() {
 
 // RedisLikeDateToMysql 定时将redis的点赞数据存入mysql
 func RedisLikeDateToMysql() {
-	// todo ...
 	fmt.Println("正在将redis数据存储进数据库")
 	redis := cache.RedisCache.RedisClient
-
-	result, err := redis.HGetAll(context.Background(), "videos").Result()
-	if err != nil {
-		err = fmt.Errorf("redis获取所有数据失败" + err.Error())
+	//点赞数数据
+	keys, _ := redis.Keys(context.Background(), consts.FavoriteCountPrefix+"*").Result()
+	for _, v := range keys {
+		split := strings.Split(v, consts.FavoriteCountPrefix)
+		atoi, _ := strconv.Atoi(split[len(split)-1])
+		result, _ := redis.Get(context.Background(), v).Result()
+		i, _ := strconv.Atoi(result)
+		redisVideoLikeNumToMysql(int64(atoi), int64(i))
 	}
-
-	// 根据视频id更新点赞数量
-	for k, v := range result {
-		split := strings.Split(k, consts.FavoriteActionPrefix)
-		vid, _ := strconv.Atoi(split[len(split)-1])
-		count, _ := strconv.Atoi(v)
-		redisVideoLikeNumToMysql(int64(vid), int64(count))
-	}
-
-	// 清空redis数据
-	strs, err := redis.HKeys(context.Background(), "videos").Result()
-	for _, k := range strs {
-		redis.HDel(context.Background(), "videos", k)
-	}
-
-	// 将点赞数据批量存进数据库
-	// 获取post_set中的所有键
-	set, err := redis.Keys(context.Background(), "post_set:*").Result()
-	for _, str := range set {
-		userIds := redis.SMembers(context.Background(), "post_set:"+str).Val()
-		split := strings.Split(str, consts.FavoriteActionPrefix)
-		for _, userid := range userIds {
-			vid, _ := strconv.Atoi(split[len(split)-1])
-			uid, _ := strconv.Atoi(userid)
-			redisDateToMysql(int64(vid), int64(uid))
+	//点赞数据
+	result, _ := redis.Keys(context.Background(), consts.FavoriteActionPrefix+"*").Result()
+	for _, v := range result {
+		split := strings.Split(v, consts.FavoriteActionPrefix)
+		atoi, _ := strconv.Atoi(split[len(split)-1])
+		userIds, _ := redis.SMembers(context.Background(), v).Result()
+		for _, v1 := range userIds {
+			num, _ := strconv.Atoi(v1)
+			b := selectVideoByUserIDAndVideoID(int64(atoi), int64(num))
+			if b {
+				update(int64(num), int64(atoi))
+			} else {
+				create(int64(num), int64(atoi))
+			}
 		}
-
 	}
+}
+
+func update(userID, videoID int64) {
+	q := query.Q
+	tFavorite := q.TFavorite
+	_, err := q.WithContext(context.Background()).TFavorite.Where(tFavorite.VideoID.Eq(videoID), tFavorite.UserID.Eq(userID)).Update(tFavorite.Status, true)
+	if err != nil {
+		return
+	}
+}
+
+func create(userID, videoID int64) {
+	q := query.Q
+	newFav := &model.TFavorite{
+		VideoID: videoID,
+		UserID:  userID,
+		Status:  true,
+	}
+	err := q.WithContext(context.Background()).TFavorite.Create(newFav)
+	if err != nil {
+		return
+	}
+}
+
+func selectVideoByUserIDAndVideoID(videoID, userID int64) bool {
+	q := query.Q
+	tFavorite := q.TFavorite
+	_, err := q.WithContext(context.Background()).TFavorite.Where(tFavorite.VideoID.Eq(videoID), tFavorite.UserID.Eq(userID)).First()
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 // 将点赞数与videoid刷回数据库
@@ -71,15 +94,4 @@ func redisVideoLikeNumToMysql(videoId, count int64) {
 	q := query.Q
 	Tvideo := q.TVideo
 	_, _ = q.WithContext(context.Background()).TVideo.Where(Tvideo.ID.Eq(videoId)).Update(Tvideo.FavoriteCount, count)
-}
-
-// 点赞数据传进数据库
-func redisDateToMysql(videoId, userID int64) {
-	q := query.Q
-	newFav := &model.TFavorite{
-		VideoID: videoId,
-		UserID:  userID,
-		Status:  true,
-	}
-	_ = q.WithContext(context.Background()).TFavorite.Create(newFav)
 }

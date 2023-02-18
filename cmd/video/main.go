@@ -6,6 +6,7 @@ import (
 	"mini_tiktok/cmd/video/mw/asynqmw"
 	"mini_tiktok/cmd/video/mw/cos"
 	"mini_tiktok/pkg/nacos"
+	"mini_tiktok/pkg/task"
 	"net"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -34,7 +35,7 @@ func Init() {
 	dal.Init()
 	cos.Init()
 	asynqmw.Init()
-	//task.Init()
+	task.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }
