@@ -2,6 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"mini_tiktok/cmd/video/mw/asynqmw"
+	"mini_tiktok/cmd/video/mw/cos"
+	"mini_tiktok/pkg/nacos"
+	"mini_tiktok/pkg/task"
+	"net"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -10,18 +17,29 @@ import (
 	"github.com/kitex-contrib/obs-opentelemetry/provider"
 	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	"github.com/kitex-contrib/registry-nacos/registry"
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
-	videoService "mini_tiktok/cmd/video/kitex_gen/videoService/videoservice"
+	"mini_tiktok/cmd/video/rpc"
+	"mini_tiktok/kitex_gen/videoservice/videoservice"
+	"mini_tiktok/pkg/cache"
+	"mini_tiktok/pkg/configs/config"
 	"mini_tiktok/pkg/consts"
-	"net"
+	"mini_tiktok/pkg/dal"
+	"mini_tiktok/pkg/mw"
 )
 
 func Init() {
+	// 配置的初始化要放在最前面
+	config.Init()
+	nacos.Init()
+	cache.Init()
+	rpc.Init()
+	dal.Init()
+	cos.Init()
+	asynqmw.Init()
+	task.Init()
 	klog.SetLogger(kitexlogrus.NewLogger())
 	klog.SetLevel(klog.LevelInfo)
 }
+
 func main() {
 	p := provider.NewOpenTelemetryProvider(
 		provider.WithServiceName(consts.VideoServiceName),
@@ -29,42 +47,20 @@ func main() {
 		provider.WithInsecure(),
 	)
 	defer p.Shutdown(context.Background())
-
-	sc := []constant.ServerConfig{
-		*constant.NewServerConfig(consts.NacosAddr, consts.NacosPort),
-	}
-
-	cc := constant.ClientConfig{
-		NamespaceId:         "public",
-		TimeoutMs:           5000,
-		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
-		LogLevel:            "info",
-		Username:            "nacos",
-		Password:            "nacos",
-	}
-
-	cli, err := clients.NewNamingClient(
-		vo.NacosClientParam{
-			ClientConfig:  &cc,
-			ServerConfigs: sc,
-		},
-	)
-	if err != nil {
-		panic(err)
-	}
-	addr, err := net.ResolveTCPAddr(consts.TCP, consts.VideoServiceAddr)
-	if err != nil {
-		panic(err)
-	}
 	Init()
-	svr := videoService.NewServer(new(VideoServiceImpl),
+
+	addr, err := net.ResolveTCPAddr(consts.TCP, fmt.Sprintf("127.0.0.1%v", consts.VideoServiceAddr))
+	if err != nil {
+		panic(err)
+	}
+	svr := videoservice.NewServer(new(VideoServiceImpl),
 		server.WithServiceAddr(addr),
-		server.WithLimit(&limit.Option{MaxConnections: 1000, MaxQPS: 100}),
+		server.WithLimit(&limit.Option{MaxConnections: 2000, MaxQPS: 500}),
+		//server.WithMiddleware(mw.CommonMiddleware),
+		server.WithMiddleware(mw.ServerMiddleware),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: consts.VideoServiceName}),
 		server.WithSuite(tracing.NewServerSuite()),
-		server.WithRegistry(registry.NewNacosRegistry(cli)),
+		server.WithRegistry(registry.NewNacosRegistry(nacos.NacosClient)),
 	)
 
 	err = svr.Run()

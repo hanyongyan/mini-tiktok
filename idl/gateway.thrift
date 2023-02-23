@@ -3,7 +3,7 @@ namespace go api
 struct User {
     1: i64 id
     2: string name
-    3: string follow_count
+    3: i64 follow_count
     4: i64 follower_count
     5: bool is_follow
 }
@@ -33,7 +33,7 @@ struct FeedReq {
 
 struct FeedResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: i64 next_time
     4: list<Video> video_list
 }
@@ -45,7 +45,7 @@ struct UserRegisterReq {
 
 struct UserRegisterResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: i64 user_id
     4: string token
 }
@@ -59,7 +59,7 @@ struct UserLoginReq {
 
 struct UserLoginResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: i64 user_id
     4: string token
 }
@@ -71,7 +71,7 @@ struct UserReq {
 
 struct UserResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: User user
 }
 
@@ -83,7 +83,7 @@ struct PublishActionReq {
 
 struct PublishActionResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
 }
 
 struct PublishListReq {
@@ -93,7 +93,7 @@ struct PublishListReq {
 
 struct PublishListResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: list<Video> video_list
 }
 
@@ -105,7 +105,7 @@ struct FavoriteActionReq {
 
 struct FavoriteActionResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
 
 }
 
@@ -116,7 +116,7 @@ struct FavoriteListReq {
 
 struct FavoriteListResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: list<Video> video_list
 }
 
@@ -130,7 +130,7 @@ struct CommentActionReq {
 
 struct CommentActionResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: Comment comment
 }
 
@@ -141,7 +141,7 @@ struct CommentListReq {
 
 struct CommentListResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: list<Comment> comment_list
 }
 
@@ -153,7 +153,7 @@ struct RelationActionReq {
 
 struct RelationActionResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
 
 }
 
@@ -164,7 +164,7 @@ struct RelationFollowListReq {
 
 struct RelationFollowListResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: list<User> user_list
 
 }
@@ -176,7 +176,7 @@ struct RelationFollowerListReq {
 
 struct RelationFollowerListResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: list<User> user_list
 }
 
@@ -187,7 +187,7 @@ struct RelationFriendListReq {
 
 struct RelationFriendListResp {
     1: i64 status_code
-    2: string status_message
+    2: string status_msg
     3: list<User> user_list
 }
 
@@ -197,7 +197,7 @@ service ApiService {
     UserLoginResp UserLogin(1: UserLoginReq req) (api.post="/douyin/user/login")
     UserResp User(1: UserReq req) (api.get="/douyin/user")
     PublishActionResp PublishAction(1: PublishActionReq req) (api.post="/douyin/publish/action")
-    PublishListResp PublishList(1: PublishActionReq req) (api.get="/douyin/publish/list")
+    PublishListResp PublishList(1: PublishListReq req) (api.get="/douyin/publish/list")
     FavoriteActionResp FavoriteAction(1: FavoriteActionReq req) (api.post="/douyin/favorite/action")
     FavoriteListResp FavoriteList(1: FavoriteListReq req) (api.get="/douyin/favorite/list")
     CommentActionResp CommentAction(1: CommentActionReq req) (api.post="/douyin/comment/action")

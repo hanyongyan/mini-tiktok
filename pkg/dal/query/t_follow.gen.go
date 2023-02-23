@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"awesomeProject4/dal/model"
+	"mini_tiktok/pkg/dal/model"
 )
 
 func newTFollow(db *gorm.DB, opts ...gen.DOOption) tFollow {

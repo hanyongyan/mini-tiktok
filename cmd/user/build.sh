@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-RUN_NAME="userService"
+RUN_NAME="userservice"
 
 mkdir -p output/bin
 cp script/* output/
@@ -10,4 +10,3 @@ if [ "$IS_SYSTEM_TEST_ENV" != "1" ]; then
 else
     go test -c -covermode=set -o output/bin/${RUN_NAME} -coverpkg=./...
 fi
-

@@ -1,0 +1,11 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go mod download
+      - cd cmd/api && sh build.sh
+      - cd cmd/chat && sh build.sh
+      - cd cmd/user && sh build.sh
+      - cd cmd/video && sh build.sh
+  
